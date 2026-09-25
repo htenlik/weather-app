@@ -6,6 +6,7 @@ import com.kampplus.hava.feature.weather.domain.model.City
 import com.kampplus.hava.feature.weather.domain.model.CityWeather
 import com.kampplus.hava.feature.weather.domain.model.Forecast
 import com.kampplus.hava.feature.weather.domain.repository.WeatherRepository
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -17,10 +18,22 @@ class FakeWeatherRepository(
 
     val requestedForecasts = mutableListOf<City>()
 
-    override fun getCityWeathers(): Flow<AppResult<List<CityWeather>>> = flow { emit(cityWeathersResult()) }
+    /** Kaç kez liste istendi; "hızlı tıklamalar ek istek üretmez" ölçütü için. */
+    var cityWeathersCalls = 0
+        private set
+
+    /** null değilse istek, kapı açılana ([CompletableDeferred.complete]) kadar bekler: uçuştaki isteği simüle eder. */
+    var gate: CompletableDeferred<Unit>? = null
+
+    override fun getCityWeathers(): Flow<AppResult<List<CityWeather>>> = flow {
+        cityWeathersCalls++
+        gate?.await()
+        emit(cityWeathersResult())
+    }
 
     override suspend fun getForecast(city: City): AppResult<Forecast> {
         requestedForecasts += city
+        gate?.await()
         return forecastResult(city)
     }
 }
