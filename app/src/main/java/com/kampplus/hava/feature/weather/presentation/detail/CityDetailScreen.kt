@@ -7,10 +7,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kampplus.hava.R
@@ -63,8 +67,8 @@ fun CityDetailScreen(uiState: UiState<CityDetailUiModel>, onBack: () -> Unit, mo
         ) {
             when (uiState) {
                 UiState.Loading -> CircularProgressIndicator()
-                UiState.Empty -> Text(stringResource(R.string.detail_invalid_parameter), modifier = Modifier.padding(32.dp))
-                is UiState.Error -> Text(uiState.message.asString(), modifier = Modifier.padding(32.dp))
+                UiState.Empty -> InvalidCityView(message = stringResource(R.string.detail_invalid_parameter), onBack = onBack)
+                is UiState.Error -> InvalidCityView(message = uiState.message.asString(), onBack = onBack)
                 is UiState.Success -> CityDetailContent(detail = uiState.data)
             }
         }
@@ -110,6 +114,30 @@ private fun CityDetailContent(detail: CityDetailUiModel, modifier: Modifier = Mo
     }
 }
 
+/**
+ * Geçersiz ya da bulunamayan şehir için açıklayıcı görünüm. Kullanıcı neden boş bir ekran gördüğünü
+ * anlar ve her durumda listeye dönebilecek bir yol bulur; hata ekranı çıkmaz sokak değildir.
+ */
+@Composable
+private fun InvalidCityView(message: String, onBack: () -> Unit, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Warning,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.error
+        )
+        Text(text = message, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+        Button(onClick = onBack) {
+            Text(text = stringResource(R.string.action_back_to_list))
+        }
+    }
+}
+
 @Composable
 private fun DetailRow(label: String, value: String, modifier: Modifier = Modifier) {
     Row(
@@ -140,6 +168,26 @@ private val previewDetail = CityDetailUiModel(
 @Preview(showBackground = true)
 @Composable
 private fun CityDetailScreenPreview() {
+    HavaTheme {
+        CityDetailScreen(uiState = UiState.Success(previewDetail), onBack = {})
+    }
+}
+
+@Preview(name = "Geçersiz parametre", showBackground = true)
+@Composable
+private fun CityDetailScreenInvalidPreview() {
+    HavaTheme {
+        CityDetailScreen(
+            uiState = UiState.Error(UiText.Dynamic("42 kimlikli şehir listede bulunamadı. Listeye dönüp tekrar seç.")),
+            onBack = {}
+        )
+    }
+}
+
+@Preview(name = "Dar ekran", showBackground = true, widthDp = 320)
+@Preview(name = "Geniş ekran", showBackground = true, widthDp = 600)
+@Composable
+private fun CityDetailScreenSizePreview() {
     HavaTheme {
         CityDetailScreen(uiState = UiState.Success(previewDetail), onBack = {})
     }
