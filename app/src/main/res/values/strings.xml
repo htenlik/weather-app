@@ -34,4 +34,17 @@
     <string name="favorites_empty_message">Listede ya da tahmin ekranında kalp ikonuna dokunarak şehirleri buraya ekleyebilirsin.</string>
     <string name="favorites_removed">%1$s favorilerden çıkarıldı</string>
     <string name="action_undo">Geri al</string>
+    <string name="loading">Yükleniyor…</string>
+    <string name="action_retry">Tekrar dene</string>
+    <string name="error_network">İnternet bağlantısı yok. Bağlantını kontrol edip tekrar dene.</string>
+    <string name="error_not_found">Bu kayıt bulunamadı.</string>
+    <string name="error_parse">Sunucudan beklenmeyen bir yanıt geldi.</string>
+    <string name="error_server">Sunucu şu anda yanıt veremiyor (HTTP %1$d).</string>
+    <string name="list_empty_title">Gösterilecek şehir yok</string>
+    <string name="list_empty_message">Şu an listelenecek şehir bulunamadı. Aşağı çekerek yenileyebilirsin.</string>
+    <string name="demo_menu">Demo senaryosu</string>
+    <string name="demo_scenario_normal">Normal</string>
+    <string name="demo_scenario_slow">Yavaş ağ (4 sn)</string>
+    <string name="demo_scenario_empty">Boş sonuç</string>
+    <string name="demo_scenario_error">Ağ hatası</string>
 </resources>
