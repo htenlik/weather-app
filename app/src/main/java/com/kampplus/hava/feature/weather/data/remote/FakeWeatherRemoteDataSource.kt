@@ -1,5 +1,7 @@
 package com.kampplus.hava.feature.weather.data.remote
 
+import com.kampplus.hava.core.common.demo.DemoScenario
+import com.kampplus.hava.core.common.demo.DemoScenarioSwitch
 import com.kampplus.hava.feature.weather.domain.model.City
 import com.kampplus.hava.feature.weather.domain.model.CityWeather
 import com.kampplus.hava.feature.weather.domain.model.CurrentWeather
@@ -7,23 +9,30 @@ import com.kampplus.hava.feature.weather.domain.model.DailyForecast
 import com.kampplus.hava.feature.weather.domain.model.Forecast
 import com.kampplus.hava.feature.weather.domain.model.HourlyForecast
 import com.kampplus.hava.feature.weather.domain.model.WeatherCode
+import java.io.IOException
 import java.time.LocalDateTime
 import javax.inject.Inject
 import kotlinx.coroutines.delay
 
 /**
- * CP1–CP3 için koda gömülü sabit hava verisi. İnternet gerektirmez; aynı şehir için
- * her zaman aynı değeri üretir. CP4'te DI binding'i değiştirilerek gerçek API ile yer değiştirir.
+ * Koda gömülü sabit hava verisi. İnternet gerektirmez; aynı şehir için her zaman aynı değeri üretir.
+ * Gerçek bir ağ çağrısı gibi `suspend` ile bekler; [DemoScenarioSwitch] ile gecikme, boş sonuç ve
+ * hata senaryoları çalışma zamanında seçilir (CP4). Gerçek API'ye geçişte yalnızca DI binding'i değişir.
  */
-class FakeWeatherRemoteDataSource @Inject constructor() : WeatherRemoteDataSource {
+class FakeWeatherRemoteDataSource @Inject constructor(
+    private val scenarioSwitch: DemoScenarioSwitch
+) : WeatherRemoteDataSource {
 
     override suspend fun getCurrentWeather(cities: List<City>): List<CityWeather> {
-        delay(FAKE_LATENCY_MS)
+        // Senaryo istek başında bir kez okunur; istek sürerken menüden değişmesi o isteği etkilemez.
+        val scenario = scenarioSwitch.scenario.value
+        simulateNetwork(scenario)
+        if (scenario == DemoScenario.EMPTY) return emptyList()
         return cities.map { city -> CityWeather(city = city, current = currentFor(city)) }
     }
 
     override suspend fun getForecast(city: City): Forecast {
-        delay(FAKE_LATENCY_MS)
+        simulateNetwork(scenarioSwitch.scenario.value)
         val current = currentFor(city)
         val slot = slotOf(city)
         val hourly = List(HOURS) { hour ->
@@ -46,6 +55,20 @@ class FakeWeatherRemoteDataSource @Inject constructor() : WeatherRemoteDataSourc
             )
         }
         return Forecast(current = current, hourly = hourly, daily = daily)
+    }
+
+    /** Gecikme ve hata senaryoları. İptal edilirse [delay] CancellationException fırlatır; bu hata sayılmaz. */
+    private suspend fun simulateNetwork(scenario: DemoScenario) {
+        when (scenario) {
+            DemoScenario.SLOW -> delay(SLOW_LATENCY_MS)
+
+            DemoScenario.ERROR -> {
+                delay(FAKE_LATENCY_MS)
+                throw IOException("Simüle edilmiş ağ hatası")
+            }
+
+            DemoScenario.NORMAL, DemoScenario.EMPTY -> delay(FAKE_LATENCY_MS)
+        }
     }
 
     /** Liste ve detay aynı şehir için aynı anlık değeri göstersin diye tek kaynaktan üretilir. */
@@ -72,6 +95,7 @@ class FakeWeatherRemoteDataSource @Inject constructor() : WeatherRemoteDataSourc
             3.0, 3.5, 3.5, 3.0, 2.0, 1.0, 0.0, -1.0, -2.0, -3.0, -4.0, -4.5
         )
         const val FAKE_LATENCY_MS = 300L
+        const val SLOW_LATENCY_MS = 4_000L
         val OBSERVED_AT: LocalDateTime = LocalDateTime.of(2026, 9, 24, 12, 0)
         val TEMPERATURES =
             listOf(18.4, 21.0, 26.3, 19.7, 29.1, 30.2, 22.8, 27.5, 31.4, 20.1, 28.0, 25.6, 17.9, 16.4, 19.2, 18.8, 11.3, 13.7, 23.5, 27.0)
