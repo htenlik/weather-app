@@ -19,6 +19,7 @@ import com.kampplus.hava.testing.city
 import com.kampplus.hava.testing.cityWeather
 import com.kampplus.hava.testing.forecast
 import com.kampplus.hava.testing.testUiMapper
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
@@ -31,6 +32,7 @@ import org.junit.Rule
 import org.junit.Test
 
 /** CP3 kabul kriteri: "birinde ekleyince diğerinde de görünüyor". */
+@OptIn(ExperimentalCoroutinesApi::class)
 class FavoritesSyncTest {
 
     @get:Rule

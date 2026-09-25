@@ -18,6 +18,7 @@ import com.kampplus.hava.testing.MainDispatcherRule
 import com.kampplus.hava.testing.forecast
 import com.kampplus.hava.testing.testUiMapper
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -25,6 +26,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ForecastDetailViewModelTest {
 
     @get:Rule

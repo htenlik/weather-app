@@ -4,6 +4,7 @@ import com.kampplus.hava.core.common.demo.DemoScenario
 import com.kampplus.hava.core.common.demo.DemoScenarioSwitch
 import com.kampplus.hava.testing.city
 import java.io.IOException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -11,6 +12,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class FakeWeatherRemoteDataSourceTest {
 
     private val scenarioSwitch = DemoScenarioSwitch()
