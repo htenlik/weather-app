@@ -17,6 +17,8 @@ import com.kampplus.hava.testing.FakeWeatherRepository
 import com.kampplus.hava.testing.MainDispatcherRule
 import com.kampplus.hava.testing.forecast
 import com.kampplus.hava.testing.testUiMapper
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -79,12 +81,51 @@ class ForecastDetailViewModelTest {
     }
 
     @Test
-    fun `shows error when forecast fails`() = runTest {
+    fun `shows a user facing message when forecast fails`() = runTest {
         repository.forecastResult = { AppResult.Failure(AppError.Network) }
 
         createViewModel().uiState.test {
             assertEquals(UiState.Loading, awaitItem())
+            assertEquals(UiState.Error(UiText.Resource(R.string.error_network)), awaitItem())
+        }
+    }
+
+    @Test
+    fun `retry after error emits loading and then the forecast`() = runTest {
+        repository.forecastResult = { AppResult.Failure(AppError.Network) }
+        val viewModel = createViewModel()
+
+        viewModel.uiState.test {
+            assertEquals(UiState.Loading, awaitItem())
             assertTrue(awaitItem() is UiState.Error)
+
+            repository.forecastResult = { AppResult.Success(forecast()) }
+            repository.gate = CompletableDeferred()
+            viewModel.loadData()
+            assertEquals(UiState.Loading, awaitItem())
+
+            repository.gate?.complete(Unit)
+            assertTrue(awaitItem() is UiState.Success)
+        }
+        assertEquals(2, repository.requestedForecasts.size)
+    }
+
+    @Test
+    fun `repeated loadData calls while a request is in flight do not start new requests`() = runTest {
+        repository.forecastResult = { AppResult.Success(forecast()) }
+        repository.gate = CompletableDeferred()
+        val viewModel = createViewModel()
+
+        viewModel.uiState.test {
+            assertEquals(UiState.Loading, awaitItem())
+            viewModel.loadData()
+            viewModel.loadData()
+            runCurrent()
+            assertEquals(1, repository.requestedForecasts.size)
+
+            repository.gate?.complete(Unit)
+            assertTrue(awaitItem() is UiState.Success)
+            assertEquals(1, repository.requestedForecasts.size)
         }
     }
 }

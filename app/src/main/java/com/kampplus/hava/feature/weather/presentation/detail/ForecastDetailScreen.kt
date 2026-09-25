@@ -12,7 +12,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -28,7 +27,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kampplus.hava.R
+import com.kampplus.hava.core.ui.component.ErrorView
 import com.kampplus.hava.core.ui.component.FavoriteToggleButton
+import com.kampplus.hava.core.ui.component.LoadingView
 import com.kampplus.hava.core.ui.component.TemperatureBadge
 import com.kampplus.hava.core.ui.state.UiState
 import com.kampplus.hava.core.ui.text.UiText
@@ -48,6 +49,7 @@ fun ForecastDetailScreen(
     onBack: () -> Unit,
     onShare: (ForecastUiModel) -> Unit,
     onFavoriteClick: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -76,9 +78,9 @@ fun ForecastDetailScreen(
             contentAlignment = Alignment.Center
         ) {
             when (uiState) {
-                UiState.Loading -> CircularProgressIndicator()
-                UiState.Empty -> Text(stringResource(R.string.empty_generic))
-                is UiState.Error -> Text(uiState.message.asString())
+                UiState.Loading -> LoadingView()
+                UiState.Empty -> ErrorView(message = stringResource(R.string.error_not_found))
+                is UiState.Error -> ErrorView(message = uiState.message.asString(), onRetry = onRetry)
                 is UiState.Success -> ForecastContent(forecast = uiState.data)
             }
         }
@@ -175,7 +177,8 @@ private fun ForecastDetailScreenPreview() {
             ),
             onBack = {},
             onShare = {},
-            onFavoriteClick = {}
+            onFavoriteClick = {},
+            onRetry = {}
         )
     }
 }

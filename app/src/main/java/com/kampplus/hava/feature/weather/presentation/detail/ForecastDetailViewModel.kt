@@ -3,11 +3,10 @@ package com.kampplus.hava.feature.weather.presentation.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kampplus.hava.R
 import com.kampplus.hava.core.common.result.AppResult
 import com.kampplus.hava.core.navigation.ForecastDestination
 import com.kampplus.hava.core.ui.state.UiState
-import com.kampplus.hava.core.ui.text.UiText
+import com.kampplus.hava.core.ui.text.toUiText
 import com.kampplus.hava.feature.favorites.domain.usecase.ObserveFavoriteCityIdsUseCase
 import com.kampplus.hava.feature.favorites.domain.usecase.ToggleFavoriteCityUseCase
 import com.kampplus.hava.feature.weather.domain.model.City
@@ -19,6 +18,7 @@ import com.kampplus.hava.feature.weather.presentation.model.WeatherUiMapper
 import com.kampplus.hava.feature.weather.presentation.model.toFavorite
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -50,11 +50,14 @@ class ForecastDetailViewModel @Inject constructor(
     /** null = henüz yükleniyor. */
     private val result = MutableStateFlow<AppResult<Forecast>?>(null)
 
+    /** Aktif istek; bitmeden gelen "Tekrar dene" yok sayılır. */
+    private var loadJob: Job? = null
+
     val uiState: StateFlow<UiState<ForecastUiModel>> = combine(result, observeFavoriteCityIds()) { result, favoriteIds ->
         when (result) {
             null -> UiState.Loading
             is AppResult.Success -> UiState.Success(uiMapper.toForecast(city, result.data, isFavorite = city.id in favoriteIds))
-            is AppResult.Failure -> UiState.Error(UiText.Resource(R.string.error_generic))
+            is AppResult.Failure -> UiState.Error(result.error.toUiText())
         }
     }.stateIn(
         scope = viewModelScope,
@@ -63,18 +66,20 @@ class ForecastDetailViewModel @Inject constructor(
     )
 
     init {
-        load()
+        loadData()
+    }
+
+    /** İlk yükleme ve "Tekrar dene": önce Loading (null), sonra sonuç. Yüklenirken gelen ikinci çağrı yok sayılır. */
+    fun loadData() {
+        if (loadJob?.isActive == true) return
+        loadJob = viewModelScope.launch {
+            result.value = null
+            result.value = getForecast(city)
+        }
     }
 
     fun onToggleFavorite() {
         viewModelScope.launch { toggleFavoriteCity(city.toFavorite()) }
-    }
-
-    private fun load() {
-        viewModelScope.launch {
-            result.value = null
-            result.value = getForecast(city)
-        }
     }
 
     private companion object {
