@@ -28,7 +28,7 @@ fun HavaNavHost(
             CityListRoute(selectionViewModel = selectionViewModel, onCityClick = openForecast)
         }
         composable<ForecastDestination> {
-            ForecastDetailRoute(onBack = navController::navigateUp)
+            ForecastDetailRoute(selectionViewModel = selectionViewModel, onBack = navController::navigateUp)
         }
     }
 }

@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kampplus.hava.R
+import com.kampplus.hava.core.ui.component.FavoriteToggleButton
 import com.kampplus.hava.core.ui.component.TemperatureBadge
 import com.kampplus.hava.core.ui.state.UiState
 import com.kampplus.hava.core.ui.text.UiText
@@ -44,7 +45,9 @@ import com.kampplus.hava.feature.weather.presentation.model.temperatureColor
 @Composable
 fun ForecastDetailScreen(
     uiState: UiState<ForecastUiModel>,
+    isFavorite: Boolean,
     onBack: () -> Unit,
+    onFavoriteClick: () -> Unit,
     onShare: (ForecastUiModel) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -59,6 +62,7 @@ fun ForecastDetailScreen(
                     }
                 },
                 actions = {
+                    FavoriteToggleButton(isFavorite = isFavorite, onClick = onFavoriteClick)
                     if (uiState is UiState.Success) {
                         ShareButton(onClick = { onShare(uiState.data) })
                     }
@@ -170,7 +174,9 @@ private fun ForecastDetailScreenPreview() {
                     daily = List(7) { DailyUiModel(UiText.Dynamic("Cuma"), "⛅", "14°", "24°", "%10") }
                 )
             ),
+            isFavorite = true,
             onBack = {},
+            onFavoriteClick = {},
             onShare = {}
         )
     }

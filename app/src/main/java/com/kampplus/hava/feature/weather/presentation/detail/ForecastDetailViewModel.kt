@@ -39,6 +39,9 @@ class ForecastDetailViewModel @Inject constructor(
         )
     )
 
+    /** Ortak seçim state'iyle eşleşmek için; ekranın hangi şehri gösterdiği yüklemeden bağımsız bilinir. */
+    val cityId: Long get() = city.id
+
     private val _uiState = MutableStateFlow<UiState<ForecastUiModel>>(UiState.Loading)
     val uiState: StateFlow<UiState<ForecastUiModel>> = _uiState.asStateFlow()
 
