@@ -62,3 +62,16 @@ private fun MainScreenPreview() {
         )
     }
 }
+
+@Preview(name = "Dar ekran", showBackground = true, widthDp = 320)
+@Preview(name = "Büyük yazı", showBackground = true, fontScale = 1.5f)
+@Composable
+private fun MainScreenStressPreview() {
+    HavaTheme {
+        MainScreen(
+            title = "Şehir Havası",
+            description = "Öne çıkan şehirlerin anlık hava durumunu keşfet; kartlar dar ekranda ve büyük yazı ölçeğinde de okunur.",
+            cards = sampleContent
+        )
+    }
+}

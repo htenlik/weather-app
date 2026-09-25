@@ -56,3 +56,29 @@ private fun ContentCardShortPreview() {
         )
     }
 }
+
+@Preview(name = "Uzun metin", showBackground = true)
+@Composable
+private fun ContentCardLongPreview() {
+    HavaTheme {
+        ContentCard(
+            title = "Afyonkarahisar Merkez, İç Ege Bölgesi, Türkiye Cumhuriyeti",
+            description = "Gök gürültülü ve dolu yağışlı şiddetli fırtına bekleniyor; rüzgâr güneybatıdan " +
+                "saatte 45 km hızla esiyor, nem oranı %88, hissedilen sıcaklık 12°.",
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(name = "Dar ekran", showBackground = true, widthDp = 320)
+@Preview(name = "Büyük yazı", showBackground = true, fontScale = 1.5f)
+@Composable
+private fun ContentCardStressPreview() {
+    HavaTheme {
+        ContentCard(
+            title = "Kahramanmaraş Onikişubat",
+            description = "27° · Az bulutlu · Nem %40 · Rüzgâr 12 km/sa · Hissedilen 26°",
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
