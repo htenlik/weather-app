@@ -3,6 +3,17 @@
     <string name="list_title">Şehirler</string>
     <string name="error_generic">Bir şeyler ters gitti.</string>
     <string name="empty_generic">Gösterilecek kayıt yok.</string>
+    <string name="detail_title">Şehir Detayı</string>
+    <string name="action_back">Geri</string>
+    <string name="action_back_to_list">Listeye dön</string>
+    <string name="detail_feels_like">Hissedilen</string>
+    <string name="detail_humidity">Nem</string>
+    <string name="detail_wind">Rüzgâr</string>
+    <string name="detail_observed_at">Gözlem saati</string>
+    <string name="detail_percent_value">%%%1$d</string>
+    <string name="detail_wind_value">%1$d km/sa</string>
+    <string name="detail_invalid_parameter">Geçersiz şehir kimliği. Bu bağlantı bir şehre karşılık gelmiyor; listeye dönüp bir şehir seç.</string>
+    <string name="detail_city_not_found">%1$d kimlikli şehir listede bulunamadı. Listeye dönüp tekrar seç.</string>
     <string name="condition_clear">Açık</string>
     <string name="condition_mainly_clear">Az bulutlu</string>
     <string name="condition_partly_cloudy">Parçalı bulutlu</string>

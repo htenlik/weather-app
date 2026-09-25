@@ -11,9 +11,10 @@ import com.kampplus.hava.feature.weather.domain.policy.WeatherConditionClassifie
 import com.kampplus.hava.feature.weather.domain.usecase.GetCityWeathersUseCase
 import com.kampplus.hava.feature.weather.presentation.model.CityWeatherUiModel
 import com.kampplus.hava.feature.weather.presentation.model.WeatherConditionUiRegistry
+import com.kampplus.hava.feature.weather.presentation.model.displaySubtitle
+import com.kampplus.hava.feature.weather.presentation.model.toTemperatureText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -46,8 +47,8 @@ class CityListViewModel @Inject constructor(
         return CityWeatherUiModel(
             cityId = city.id,
             title = city.name,
-            subtitle = listOfNotNull(city.region, city.country).distinct().joinToString(", "),
-            temperatureText = "${current.temperatureC.roundToInt()}°",
+            subtitle = city.displaySubtitle(),
+            temperatureText = current.temperatureC.toTemperatureText(),
             temperatureC = current.temperatureC,
             conditionEmoji = conditionUi.emoji,
             conditionLabel = conditionUi.label
