@@ -9,9 +9,15 @@ import androidx.navigation.compose.rememberNavController
 import com.kampplus.hava.feature.weather.domain.model.City
 import com.kampplus.hava.feature.weather.presentation.detail.ForecastDetailRoute
 import com.kampplus.hava.feature.weather.presentation.list.CityListRoute
+import com.kampplus.hava.feature.weather.presentation.selection.SelectionViewModel
 
+/** Navigasyon grafiği. Paylaşılan [selectionViewModel] üstten gelir ve ilgili her hedefe aynı örnek verilir. */
 @Composable
-fun HavaNavHost(modifier: Modifier = Modifier, navController: NavHostController = rememberNavController()) {
+fun HavaNavHost(
+    selectionViewModel: SelectionViewModel,
+    modifier: Modifier = Modifier,
+    navController: NavHostController = rememberNavController()
+) {
     val openForecast: (City) -> Unit = { city -> navController.navigate(city.toDestination()) }
     NavHost(
         navController = navController,
@@ -19,7 +25,7 @@ fun HavaNavHost(modifier: Modifier = Modifier, navController: NavHostController 
         modifier = modifier
     ) {
         composable<ListDestination> {
-            CityListRoute(onCityClick = openForecast)
+            CityListRoute(selectionViewModel = selectionViewModel, onCityClick = openForecast)
         }
         composable<ForecastDestination> {
             ForecastDetailRoute(onBack = navController::navigateUp)

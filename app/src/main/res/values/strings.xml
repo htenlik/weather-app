@@ -25,4 +25,8 @@
     <string name="detail_wind">Rüzgâr</string>
     <string name="action_share">Paylaş</string>
     <string name="share_text">%1$s şu an %2$s %3$s %4$s</string>
+    <string name="filter_only_favorites">Favoriler (%1$d)</string>
+    <string name="favorites_empty">Henüz favori şehir yok. Kalp ikonuna dokunarak ekleyebilirsin.</string>
+    <string name="action_favorite_add">Favorilere ekle</string>
+    <string name="action_favorite_remove">Favorilerden çıkar</string>
 </resources>

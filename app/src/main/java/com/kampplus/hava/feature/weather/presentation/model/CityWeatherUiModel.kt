@@ -10,5 +10,7 @@ data class CityWeatherUiModel(
     val temperatureText: String,
     val temperatureC: Double,
     val conditionEmoji: String,
-    val conditionLabel: UiText
+    val conditionLabel: UiText,
+    /** Ortak seçim state'inden türetilir; ViewModel bu alanı doldurmaz. */
+    val isFavorite: Boolean = false
 )
