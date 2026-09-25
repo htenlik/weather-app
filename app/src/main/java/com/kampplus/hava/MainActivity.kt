@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.kampplus.hava.core.ui.theme.HavaTheme
-import com.kampplus.hava.feature.weather.presentation.list.CityListRoute
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -15,7 +14,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             HavaTheme {
-                CityListRoute()
+                HavaApp()
             }
         }
     }

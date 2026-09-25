@@ -8,7 +8,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 /** ViewModel'i ekrana bağlayan katman. Ekranın kendisi ([CityListScreen]) stateless'tır. */
 @Composable
-fun CityListRoute(modifier: Modifier = Modifier, viewModel: CityListViewModel = hiltViewModel()) {
+fun CityListRoute(onCityClick: (Long) -> Unit, modifier: Modifier = Modifier, viewModel: CityListViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    CityListScreen(uiState = uiState, modifier = modifier)
+    CityListScreen(uiState = uiState, onCityClick = onCityClick, modifier = modifier)
 }

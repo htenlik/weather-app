@@ -20,9 +20,10 @@ import com.kampplus.hava.core.ui.theme.HavaTheme
 import com.kampplus.hava.feature.weather.presentation.model.CityWeatherUiModel
 import com.kampplus.hava.feature.weather.presentation.model.temperatureColor
 
+/** Tıklama kararı kartın değildir: yalnızca [onClick] ile üst katmana bildirir. */
 @Composable
-fun CityWeatherCard(item: CityWeatherUiModel, modifier: Modifier = Modifier) {
-    Card(modifier = modifier.fillMaxWidth()) {
+fun CityWeatherCard(item: CityWeatherUiModel, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Card(onClick = onClick, modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -65,7 +66,8 @@ private fun CityWeatherCardPreview() {
                 temperatureC = 21.0,
                 conditionEmoji = "☀️",
                 conditionLabel = UiText.Dynamic("Açık")
-            )
+            ),
+            onClick = {}
         )
     }
 }
