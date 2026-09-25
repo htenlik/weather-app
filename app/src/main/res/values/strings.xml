@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Hava</string>
+    <string name="main_title">Şehir Havası</string>
+    <string name="main_description">Öne çıkan şehirlerin anlık hava durumunu keşfet.</string>
 </resources>

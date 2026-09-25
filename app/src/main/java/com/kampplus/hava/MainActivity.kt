@@ -4,16 +4,16 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import com.kampplus.hava.core.ui.theme.HavaTheme
+import com.kampplus.hava.feature.weather.presentation.main.MainScreen
+import com.kampplus.hava.feature.weather.presentation.main.sampleContent
 import dagger.hilt.android.AndroidEntryPoint
 
+/**
+ * Uygulama girişi. [setContent] Compose ağacını başlatır, [HavaTheme] Material 3 temasını
+ * sağlar, [MainScreen] ise ekranın kendisidir. Activity yalnızca bu üçünü birbirine bağlar.
+ */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,29 +21,12 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             HavaTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Hava",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                MainScreen(
+                    title = stringResource(R.string.main_title),
+                    description = stringResource(R.string.main_description),
+                    cards = sampleContent
+                )
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun GreetingPreview() {
-    HavaTheme {
-        Greeting("Hava")
     }
 }
