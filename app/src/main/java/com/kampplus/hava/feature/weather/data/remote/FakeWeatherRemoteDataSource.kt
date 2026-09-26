@@ -7,6 +7,7 @@ import com.kampplus.hava.feature.weather.domain.model.DailyForecast
 import com.kampplus.hava.feature.weather.domain.model.Forecast
 import com.kampplus.hava.feature.weather.domain.model.HourlyForecast
 import com.kampplus.hava.feature.weather.domain.model.WeatherCode
+import java.time.Clock
 import java.time.LocalDateTime
 import javax.inject.Inject
 import kotlinx.coroutines.delay
@@ -16,11 +17,14 @@ import kotlinx.coroutines.delay
  * her zaman aynı değeri üretir. CP4'ten itibaren bağlı değil; internetsiz demo için
  * `WeatherDataModule`'de tekrar bağlanabilir.
  */
-class FakeWeatherRemoteDataSource @Inject constructor() : WeatherRemoteDataSource {
+class FakeWeatherRemoteDataSource @Inject constructor(
+    private val clock: Clock
+) : WeatherRemoteDataSource {
 
     override suspend fun getCurrentWeather(cities: List<City>): List<CityWeather> {
         delay(FAKE_LATENCY_MS)
-        return cities.map { city -> CityWeather(city = city, current = currentFor(city)) }
+        val fetchedAt = clock.instant()
+        return cities.map { city -> CityWeather(city = city, current = currentFor(city), fetchedAt = fetchedAt) }
     }
 
     override suspend fun getForecast(city: City): Forecast {
@@ -46,7 +50,7 @@ class FakeWeatherRemoteDataSource @Inject constructor() : WeatherRemoteDataSourc
                 precipitationProbability = (day * 13) % 80
             )
         }
-        return Forecast(current = current, hourly = hourly, daily = daily)
+        return Forecast(current = current, hourly = hourly, daily = daily, fetchedAt = clock.instant())
     }
 
     /** Liste ve detay aynı şehir için aynı anlık değeri göstersin diye tek kaynaktan üretilir. */

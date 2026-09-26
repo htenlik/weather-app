@@ -8,6 +8,9 @@ import com.kampplus.hava.feature.weather.domain.model.CityWeather
 import com.kampplus.hava.feature.weather.domain.model.Forecast
 import com.kampplus.hava.feature.weather.domain.model.WeatherCode
 import com.kampplus.hava.feature.weather.domain.policy.WeatherConditionClassifier
+import java.time.Clock
+import java.time.Instant
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
@@ -20,7 +23,8 @@ import kotlin.math.roundToInt
  */
 class WeatherUiMapper @Inject constructor(
     private val conditionClassifier: WeatherConditionClassifier,
-    private val conditionUiRegistry: WeatherConditionUiRegistry
+    private val conditionUiRegistry: WeatherConditionUiRegistry,
+    private val clock: Clock
 ) {
     fun toListItem(
         cityWeather: CityWeather,
@@ -99,8 +103,16 @@ class WeatherUiMapper @Inject constructor(
             iconTint = conditionUi.tint,
             isDay = current.isDay,
             todayMinText = today?.let { degrees(it.minTemperatureC, unit) },
-            todayMaxText = today?.let { degrees(it.maxTemperatureC, unit) }
+            todayMaxText = today?.let { degrees(it.maxTemperatureC, unit) },
+            updatedAtText = updatedAtText(fetchedAt)
         )
+    }
+
+    /** Verinin alınma anı, cihaz saatiyle: bugünse yalnızca saat, değilse gün ve ay da gösterilir. */
+    fun updatedAtText(fetchedAt: Instant): String {
+        val local = fetchedAt.atZone(clock.zone)
+        val pattern = if (local.toLocalDate() == LocalDate.now(clock)) UPDATED_TIME_FORMAT else UPDATED_DATE_TIME_FORMAT
+        return local.format(pattern)
     }
 
     private fun conditionUi(code: WeatherCode, isDay: Boolean): WeatherConditionUi =
@@ -116,5 +128,7 @@ class WeatherUiMapper @Inject constructor(
         const val HOURLY_COUNT = 24
         val HOUR_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
         val DAY_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("EEEE", Locale.forLanguageTag("tr"))
+        val UPDATED_TIME_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+        val UPDATED_DATE_TIME_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM HH:mm", Locale.forLanguageTag("tr"))
     }
 }

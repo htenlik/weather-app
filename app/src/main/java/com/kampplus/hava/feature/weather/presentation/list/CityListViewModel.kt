@@ -2,6 +2,8 @@ package com.kampplus.hava.feature.weather.presentation.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kampplus.hava.core.common.network.NetworkMonitor
+import com.kampplus.hava.core.common.network.onReconnect
 import com.kampplus.hava.core.common.result.AppResult
 import com.kampplus.hava.core.ui.state.UiState
 import com.kampplus.hava.core.ui.text.toUiText
@@ -41,6 +43,7 @@ class CityListViewModel @Inject constructor(
     observeFavoriteCityIds: ObserveFavoriteCityIdsUseCase,
     private val toggleFavoriteCity: ToggleFavoriteCityUseCase,
     observeSettings: ObserveSettingsUseCase,
+    networkMonitor: NetworkMonitor,
     private val uiMapper: WeatherUiMapper
 ) : ViewModel() {
 
@@ -100,13 +103,21 @@ class CityListViewModel @Inject constructor(
                     }
                 is AppResult.Failure -> UiState.Error(result.error.toUiText())
             },
-            isRefreshing = refreshing
+            isRefreshing = refreshing,
+            updatedAtText = (result as? AppResult.Success)?.data?.maxOfOrNull { it.fetchedAt }?.let(uiMapper::updatedAtText)
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
         initialValue = CityListUiState()
     )
+
+    init {
+        // Hata ekranında bekleyen kullanıcı için bağlantı geri gelince kendiliğinden tekrar denenir.
+        viewModelScope.launch {
+            networkMonitor.onReconnect().collect { if (uiState.value.content is UiState.Error) onRetry() }
+        }
+    }
 
     fun findCity(cityId: Long): City? = loadedCities[cityId]
 

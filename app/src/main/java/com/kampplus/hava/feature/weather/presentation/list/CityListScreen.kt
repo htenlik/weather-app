@@ -10,12 +10,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -24,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kampplus.hava.R
@@ -114,7 +117,12 @@ private fun ListContent(
 
                 is UiState.Error -> ErrorView(message = content.message.asString(), onRetry = onRetry)
 
-                is UiState.Success -> CityList(items = content.data, onCityClick = onCityClick, onFavoriteClick = onFavoriteClick)
+                is UiState.Success -> CityList(
+                    items = content.data,
+                    updatedAtText = uiState.updatedAtText,
+                    onCityClick = onCityClick,
+                    onFavoriteClick = onFavoriteClick
+                )
             }
         }
     }
@@ -123,6 +131,7 @@ private fun ListContent(
 @Composable
 private fun CityList(
     items: List<CityWeatherUiModel>,
+    updatedAtText: String?,
     onCityClick: (Long) -> Unit,
     onFavoriteClick: (Long) -> Unit,
     modifier: Modifier = Modifier
@@ -139,6 +148,19 @@ private fun CityList(
                 onFavoriteClick = { onFavoriteClick(item.cityId) },
                 modifier = Modifier.animateItem()
             )
+        }
+        if (updatedAtText != null) {
+            item(key = "updatedAt") {
+                Text(
+                    text = stringResource(R.string.updated_at, updatedAtText),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .animateItem()
+                )
+            }
         }
     }
 }

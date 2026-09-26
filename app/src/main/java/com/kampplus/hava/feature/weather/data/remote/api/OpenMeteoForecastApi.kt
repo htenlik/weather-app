@@ -1,10 +1,14 @@
 package com.kampplus.hava.feature.weather.data.remote.api
 
 import com.kampplus.hava.feature.weather.data.remote.dto.ForecastResponseDto
+import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-/** https://api.open-meteo.com/v1/ — API key gerektirmez. */
+/**
+ * https://api.open-meteo.com/v1/ — API key gerektirmez.
+ * Yanıtlar [Response] olarak alınır: gövdenin yanında alınma zamanı da okunur (önbellekten gelen yanıtta ilk alınma anı).
+ */
 interface OpenMeteoForecastApi {
 
     /** Tek konum → tek nesne. */
@@ -17,7 +21,7 @@ interface OpenMeteoForecastApi {
         @Query("daily") daily: String? = null,
         @Query("forecast_days") forecastDays: Int? = null,
         @Query("timezone") timezone: String = "auto"
-    ): ForecastResponseDto
+    ): Response<ForecastResponseDto>
 
     /** Virgülle ayrılmış birden çok konum → konum sırasıyla dizi. */
     @GET("forecast")
@@ -26,5 +30,5 @@ interface OpenMeteoForecastApi {
         @Query("longitude") longitudes: String,
         @Query("current") current: String,
         @Query("timezone") timezone: String = "auto"
-    ): List<ForecastResponseDto>
+    ): Response<List<ForecastResponseDto>>
 }

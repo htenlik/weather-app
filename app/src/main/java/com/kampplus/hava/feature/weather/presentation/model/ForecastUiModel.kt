@@ -28,7 +28,9 @@ data class ForecastUiModel(
     val isDay: Boolean = true,
     /** Bugünün en düşük / en yüksek sıcaklığı; günlük tahmin yoksa null. */
     val todayMinText: String? = null,
-    val todayMaxText: String? = null
+    val todayMaxText: String? = null,
+    /** Verinin alınma saati; çevrimdışıyken önbellekten gelen verinin ne kadar eski olduğunu gösterir. */
+    val updatedAtText: String? = null
 )
 
 data class HourlyUiModel(

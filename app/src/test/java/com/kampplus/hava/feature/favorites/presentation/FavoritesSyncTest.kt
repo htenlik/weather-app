@@ -17,6 +17,7 @@ import com.kampplus.hava.feature.weather.domain.usecase.SearchCityWeathersUseCas
 import com.kampplus.hava.feature.weather.presentation.detail.ForecastDetailViewModel
 import com.kampplus.hava.feature.weather.presentation.list.CityListViewModel
 import com.kampplus.hava.testing.FakeCityRepository
+import com.kampplus.hava.testing.FakeNetworkMonitor
 import com.kampplus.hava.testing.FakeSettingsRepository
 import com.kampplus.hava.testing.FakeWeatherRepository
 import com.kampplus.hava.testing.MainDispatcherRule
@@ -50,6 +51,7 @@ class FavoritesSyncTest {
     private val observeIds = ObserveFavoriteCityIdsUseCase(favoritesRepository)
     private val toggle = ToggleFavoriteCityUseCase(favoritesRepository)
     private val observeSettings = ObserveSettingsUseCase(FakeSettingsRepository())
+    private val networkMonitor = FakeNetworkMonitor()
 
     // Lazy: ViewModel'ler MainDispatcherRule, Main dispatcher'ı değiştirdikten sonra oluşturulmalı.
     private val listViewModel by lazy {
@@ -59,6 +61,7 @@ class FavoritesSyncTest {
             observeFavoriteCityIds = observeIds,
             toggleFavoriteCity = toggle,
             observeSettings = observeSettings,
+            networkMonitor = networkMonitor,
             uiMapper = testUiMapper()
         )
     }
@@ -78,6 +81,7 @@ class FavoritesSyncTest {
             observeFavoriteCityIds = observeIds,
             toggleFavoriteCity = toggle,
             observeSettings = observeSettings,
+            networkMonitor = networkMonitor,
             uiMapper = testUiMapper()
         )
     }
@@ -87,6 +91,7 @@ class FavoritesSyncTest {
             getCurrentWeather = GetCurrentWeatherUseCase(weatherRepository),
             toggleFavoriteCity = toggle,
             observeSettings = observeSettings,
+            networkMonitor = networkMonitor,
             uiMapper = testUiMapper()
         )
     }

@@ -9,6 +9,7 @@ import com.kampplus.hava.feature.weather.domain.model.DailyForecast
 import com.kampplus.hava.feature.weather.domain.model.Forecast
 import com.kampplus.hava.feature.weather.domain.model.HourlyForecast
 import com.kampplus.hava.feature.weather.domain.model.WeatherCode
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlinx.serialization.SerializationException
@@ -16,10 +17,11 @@ import kotlinx.serialization.SerializationException
 /** `current` istenmiş ama gelmemişse yanıt bozuktur → AppError.Parse. */
 fun ForecastResponseDto.requireCurrent(): CurrentDto = current ?: throw SerializationException("Forecast response has no current block")
 
-fun ForecastResponseDto.toForecast(): Forecast = Forecast(
+fun ForecastResponseDto.toForecast(fetchedAt: Instant): Forecast = Forecast(
     current = requireCurrent().toDomain(),
     hourly = hourly?.toDomain().orEmpty(),
-    daily = daily?.toDomain().orEmpty()
+    daily = daily?.toDomain().orEmpty(),
+    fetchedAt = fetchedAt
 )
 
 /** Zamanlar `timezone=auto` ile şehrin yerel saatinde, ofsetsiz ISO formatında gelir. */
