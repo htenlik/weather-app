@@ -80,11 +80,13 @@ class OpenMeteoWeatherRemoteDataSourceTest {
         }
         // 01:00 satırında sıcaklık null → atlanır
         assertEquals(listOf(0, 2), forecast.hourly.map { it.time.hour })
+        assertEquals(listOf(false, true), forecast.hourly.map { it.isDay })
         assertEquals(35, forecast.hourly.last().precipitationProbability)
         assertEquals(LocalDate.of(2026, 9, 25), forecast.daily.last().date)
         assertEquals(6.2, forecast.daily.last().minTemperatureC, 0.0)
         val url = server.takeRequest().requestUrl!!
         assertEquals("7", url.queryParameter("forecast_days"))
+        assertTrue(url.queryParameter("hourly")!!.contains("is_day"))
     }
 
     @Test(expected = SerializationException::class)

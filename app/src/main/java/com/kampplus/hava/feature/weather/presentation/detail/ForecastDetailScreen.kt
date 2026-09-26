@@ -9,9 +9,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -24,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -74,6 +78,8 @@ fun ForecastDetailScreen(
     LightStatusBarIcons(enabled = heroStart != null)
     Scaffold(
         modifier = modifier,
+        // Yatayda çentik boşluğu içerikte değil, başlığın gradient'i altında kalır; metinler kendi içinde çentikten kaçar.
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.only(WindowInsetsSides.Vertical),
         topBar = {
             TopAppBar(
                 title = { Text(forecast?.cityName ?: stringResource(R.string.detail_title)) },
@@ -151,6 +157,7 @@ private fun ForecastContent(forecast: ForecastUiModel, modifier: Modifier = Modi
                         .weight(WIDE_FORECAST_PANE_WEIGHT)
                         .fillMaxHeight()
                         .verticalScroll(rememberScrollState())
+                        .displayCutoutPadding()
                         .padding(vertical = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
@@ -167,7 +174,9 @@ private fun ForecastContent(forecast: ForecastUiModel, modifier: Modifier = Modi
             ) {
                 HeroHeader(forecast = forecast)
                 SourceInfo(forecast = forecast)
-                ForecastSections(forecast = forecast)
+                Column(modifier = Modifier.displayCutoutPadding(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    ForecastSections(forecast = forecast)
+                }
             }
         }
     }
@@ -175,7 +184,12 @@ private fun ForecastContent(forecast: ForecastUiModel, modifier: Modifier = Modi
 
 @Composable
 private fun SourceInfo(forecast: ForecastUiModel, modifier: Modifier = Modifier) {
-    Column(modifier = modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Column(
+        modifier = modifier
+            .displayCutoutPadding()
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
         Text(text = forecast.subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         forecast.updatedAtText?.let { updatedAt ->
             Text(

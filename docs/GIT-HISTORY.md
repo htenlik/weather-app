@@ -94,3 +94,47 @@ chore(release): bump version to 1.0.0
 → `main` (tag `v1.0.0`) + `develop`'a back-merge
 
 **OCP diff'leri** (yalnızca DI binding değişir): `refactor(weather): bind OpenMeteo…`, `refactor(favorites): bind room…`, `refactor(core): bind NetworkErrorMapper…` — `git show <hash> --stat` ile inceleyin.
+
+## 1.1.0 — `katilimci/htenlik/hava-1.1`
+
+`main` (v1.0.0) üzerinden açıldı; feature branch'leri `--no-ff` merge edildi, sürüm `release/1.1.0` ile kapandı.
+
+### `feature/visual-redesign`
+```
+feat(ui): map weather conditions to vector icons and accent colors
+feat(list): redesign city card with condition icon and colored temperature
+feat(detail): add gradient hero header, hourly cards and daily range bars
+feat(favorites): show live weather for favorite cities with a local cache
+feat(theme): complete the tonal palette and make temperature colors theme-aware
+```
+### `feature/settings`
+```
+feat(settings): add user settings domain and DataStore repository
+feat(settings): show temperatures in the selected unit
+feat(settings): add settings screen with appearance, units and about
+feat(theme): apply theme mode and dynamic color from settings
+```
+### `feature/location`
+```
+feat(location): add device location domain, LocationManager repository and geocoder
+feat(location): show current-location weather card with permission flow
+```
+### `feature/offline`
+```
+feat(network): serve cached responses offline and observe connectivity
+feat(weather): record when weather data was fetched
+feat(ui): add offline banner, last-updated times and reconnect retry
+```
+### `feature/adaptive-l10n`
+```
+feat(ui): add English localization, wide-screen layouts and accessibility polish
+```
+### `release/1.1.0`
+```
+chore(release): bump version to 1.1.0
+ci: build a release apk and run on release and participant branches
+fix(detail): use each hour's own day/night flag for hourly icons
+fix(detail): extend the hero gradient under the display cutout in landscape
+docs: describe 1.1.0 features, architecture additions and history
+```
+→ `v1.1.0`

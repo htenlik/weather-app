@@ -67,8 +67,7 @@ class WeatherUiMapper @Inject constructor(
             humidityText = current.humidityPercent?.let(::percent),
             windText = current.windSpeedKmh?.let { UiText.Resource(R.string.wind_speed_value, it.roundToInt()) },
             hourly = hourly.filter { !it.time.isBefore(currentHour) }.take(HOURLY_COUNT).mapIndexed { index, hour ->
-                // Gece/gündüz saat bazında bilinmediği için anlık değere göre karar verilir.
-                val hourUi = conditionUi(hour.weatherCode, current.isDay)
+                val hourUi = conditionUi(hour.weatherCode, hour.isDay)
                 HourlyUiModel(
                     timeText = hour.time.format(HOUR_FORMAT),
                     emoji = hourUi.emoji,

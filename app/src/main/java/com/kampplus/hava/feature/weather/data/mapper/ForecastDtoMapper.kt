@@ -43,7 +43,8 @@ fun HourlyDto.toDomain(): List<HourlyForecast> = time.indices.mapNotNull { index
         time = LocalDateTime.parse(time[index]),
         temperatureC = temperature,
         weatherCode = WeatherCode(code),
-        precipitationProbability = precipitationProbability.getOrNull(index)
+        precipitationProbability = precipitationProbability.getOrNull(index),
+        isDay = isDay.getOrNull(index)?.let { it != 0 } ?: true
     )
 }
 
