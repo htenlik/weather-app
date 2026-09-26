@@ -9,6 +9,7 @@ import com.kampplus.hava.core.ui.text.toUiText
 import com.kampplus.hava.feature.favorites.domain.model.FavoriteCity
 import com.kampplus.hava.feature.favorites.domain.usecase.ObserveFavoriteCitiesUseCase
 import com.kampplus.hava.feature.favorites.domain.usecase.ToggleFavoriteCityUseCase
+import com.kampplus.hava.feature.settings.domain.usecase.ObserveSettingsUseCase
 import com.kampplus.hava.feature.weather.domain.model.CityWeather
 import com.kampplus.hava.feature.weather.domain.usecase.GetCurrentWeatherUseCase
 import com.kampplus.hava.feature.weather.presentation.model.CityWeatherUiModel
@@ -41,6 +42,7 @@ class FavoritesViewModel @Inject constructor(
     observeFavoriteCities: ObserveFavoriteCitiesUseCase,
     private val getCurrentWeather: GetCurrentWeatherUseCase,
     private val toggleFavoriteCity: ToggleFavoriteCityUseCase,
+    observeSettings: ObserveSettingsUseCase,
     private val uiMapper: WeatherUiMapper
 ) : ViewModel() {
 
@@ -66,8 +68,15 @@ class FavoritesViewModel @Inject constructor(
         if (missing.isNotEmpty()) fetch(list)
     }
 
-    val uiState: StateFlow<UiState<List<CityWeatherUiModel>>> = combine(favorites, weatherById, fetchError) { list, weather, error ->
-        val items = list.mapNotNull { favorite -> weather[favorite.id]?.let { uiMapper.toListItem(it, isFavorite = true) } }
+    val uiState: StateFlow<UiState<List<CityWeatherUiModel>>> = combine(
+        favorites,
+        weatherById,
+        fetchError,
+        observeSettings()
+    ) { list, weather, error, settings ->
+        val items = list.mapNotNull { favorite ->
+            weather[favorite.id]?.let { uiMapper.toListItem(it, isFavorite = true, unit = settings.temperatureUnit) }
+        }
         when {
             list.isEmpty() -> UiState.Empty
             items.isNotEmpty() -> UiState.Success(items)

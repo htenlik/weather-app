@@ -2,6 +2,7 @@ package com.kampplus.hava.feature.weather.presentation.model
 
 import com.kampplus.hava.R
 import com.kampplus.hava.core.ui.text.UiText
+import com.kampplus.hava.feature.settings.domain.model.TemperatureUnit
 import com.kampplus.hava.feature.weather.domain.model.City
 import com.kampplus.hava.feature.weather.domain.model.CityWeather
 import com.kampplus.hava.feature.weather.domain.model.Forecast
@@ -13,18 +14,25 @@ import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
-/** Domain modellerini ekranların ihtiyaç duyduğu biçimlendirilmiş modellere çevirir. */
+/**
+ * Domain modellerini ekranların ihtiyaç duyduğu biçimlendirilmiş modellere çevirir.
+ * Sıcaklıklar Celsius gelir; [TemperatureUnit] yalnızca metinleri etkiler, renk eşiği için ham değer korunur.
+ */
 class WeatherUiMapper @Inject constructor(
     private val conditionClassifier: WeatherConditionClassifier,
     private val conditionUiRegistry: WeatherConditionUiRegistry
 ) {
-    fun toListItem(cityWeather: CityWeather, isFavorite: Boolean = false): CityWeatherUiModel = with(cityWeather) {
+    fun toListItem(
+        cityWeather: CityWeather,
+        isFavorite: Boolean = false,
+        unit: TemperatureUnit = TemperatureUnit.Celsius
+    ): CityWeatherUiModel = with(cityWeather) {
         val conditionUi = conditionUi(current.weatherCode, current.isDay)
         CityWeatherUiModel(
             cityId = city.id,
             title = city.name,
             subtitle = subtitle(city),
-            temperatureText = degrees(current.temperatureC),
+            temperatureText = degrees(current.temperatureC, unit),
             temperatureC = current.temperatureC,
             conditionEmoji = conditionUi.emoji,
             conditionLabel = conditionUi.label,
@@ -34,7 +42,12 @@ class WeatherUiMapper @Inject constructor(
         )
     }
 
-    fun toForecast(city: City, forecast: Forecast, isFavorite: Boolean = false): ForecastUiModel = with(forecast) {
+    fun toForecast(
+        city: City,
+        forecast: Forecast,
+        isFavorite: Boolean = false,
+        unit: TemperatureUnit = TemperatureUnit.Celsius
+    ): ForecastUiModel = with(forecast) {
         val conditionUi = conditionUi(current.weatherCode, current.isDay)
         val currentHour = current.observedAt.truncatedTo(ChronoUnit.HOURS)
         val today = daily.firstOrNull()
@@ -42,11 +55,11 @@ class WeatherUiMapper @Inject constructor(
             cityId = city.id,
             cityName = city.name,
             subtitle = subtitle(city),
-            temperatureText = degrees(current.temperatureC),
+            temperatureText = degrees(current.temperatureC, unit),
             temperatureC = current.temperatureC,
             conditionEmoji = conditionUi.emoji,
             conditionLabel = conditionUi.label,
-            feelsLikeText = current.apparentTemperatureC?.let(::degrees),
+            feelsLikeText = current.apparentTemperatureC?.let { degrees(it, unit) },
             humidityText = current.humidityPercent?.let { "%$it" },
             windText = current.windSpeedKmh?.let { "${it.roundToInt()} km/sa" },
             hourly = hourly.filter { !it.time.isBefore(currentHour) }.take(HOURLY_COUNT).mapIndexed { index, hour ->
@@ -55,7 +68,7 @@ class WeatherUiMapper @Inject constructor(
                 HourlyUiModel(
                     timeText = hour.time.format(HOUR_FORMAT),
                     emoji = hourUi.emoji,
-                    temperatureText = degrees(hour.temperatureC),
+                    temperatureText = degrees(hour.temperatureC, unit),
                     precipitationText = percent(hour.precipitationProbability),
                     icon = hourUi.icon,
                     iconTint = hourUi.tint,
@@ -71,8 +84,8 @@ class WeatherUiMapper @Inject constructor(
                         UiText.Dynamic(day.date.format(DAY_FORMAT).replaceFirstChar(Char::titlecase))
                     },
                     emoji = dayUi.emoji,
-                    minText = degrees(day.minTemperatureC),
-                    maxText = degrees(day.maxTemperatureC),
+                    minText = degrees(day.minTemperatureC, unit),
+                    maxText = degrees(day.maxTemperatureC, unit),
                     precipitationText = percent(day.precipitationProbability),
                     icon = dayUi.icon,
                     iconTint = dayUi.tint,
@@ -84,8 +97,8 @@ class WeatherUiMapper @Inject constructor(
             icon = conditionUi.icon,
             iconTint = conditionUi.tint,
             isDay = current.isDay,
-            todayMinText = today?.let { degrees(it.minTemperatureC) },
-            todayMaxText = today?.let { degrees(it.maxTemperatureC) }
+            todayMinText = today?.let { degrees(it.minTemperatureC, unit) },
+            todayMaxText = today?.let { degrees(it.maxTemperatureC, unit) }
         )
     }
 
@@ -94,7 +107,7 @@ class WeatherUiMapper @Inject constructor(
 
     private fun subtitle(city: City) = listOfNotNull(city.region, city.country).distinct().joinToString(", ")
 
-    private fun degrees(celsius: Double) = "${celsius.roundToInt()}°"
+    private fun degrees(celsius: Double, unit: TemperatureUnit) = "${unit.fromCelsius(celsius).roundToInt()}°"
 
     private fun percent(value: Int?) = value?.takeIf { it > 0 }?.let { "%$it" }
 

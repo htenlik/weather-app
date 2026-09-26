@@ -9,6 +9,7 @@ import com.kampplus.hava.core.ui.state.UiState
 import com.kampplus.hava.core.ui.text.toUiText
 import com.kampplus.hava.feature.favorites.domain.usecase.ObserveFavoriteCityIdsUseCase
 import com.kampplus.hava.feature.favorites.domain.usecase.ToggleFavoriteCityUseCase
+import com.kampplus.hava.feature.settings.domain.usecase.ObserveSettingsUseCase
 import com.kampplus.hava.feature.weather.domain.model.City
 import com.kampplus.hava.feature.weather.domain.model.Coordinates
 import com.kampplus.hava.feature.weather.domain.model.Forecast
@@ -32,6 +33,7 @@ class ForecastDetailViewModel @Inject constructor(
     private val getForecast: GetForecastUseCase,
     observeFavoriteCityIds: ObserveFavoriteCityIdsUseCase,
     private val toggleFavoriteCity: ToggleFavoriteCityUseCase,
+    observeSettings: ObserveSettingsUseCase,
     private val uiMapper: WeatherUiMapper
 ) : ViewModel() {
 
@@ -53,10 +55,16 @@ class ForecastDetailViewModel @Inject constructor(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
-    val uiState: StateFlow<UiState<ForecastUiModel>> = combine(result, observeFavoriteCityIds()) { result, favoriteIds ->
+    val uiState: StateFlow<UiState<ForecastUiModel>> = combine(
+        result,
+        observeFavoriteCityIds(),
+        observeSettings()
+    ) { result, favoriteIds, settings ->
         when (result) {
             null -> UiState.Loading
-            is AppResult.Success -> UiState.Success(uiMapper.toForecast(city, result.data, isFavorite = city.id in favoriteIds))
+            is AppResult.Success -> UiState.Success(
+                uiMapper.toForecast(city, result.data, isFavorite = city.id in favoriteIds, unit = settings.temperatureUnit)
+            )
             is AppResult.Failure -> UiState.Error(result.error.toUiText())
         }
     }.stateIn(
