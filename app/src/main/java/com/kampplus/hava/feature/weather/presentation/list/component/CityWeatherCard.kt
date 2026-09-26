@@ -19,8 +19,8 @@ import com.kampplus.hava.core.ui.component.ConditionIcon
 import com.kampplus.hava.core.ui.component.FavoriteToggleButton
 import com.kampplus.hava.core.ui.text.UiText
 import com.kampplus.hava.core.ui.theme.HavaTheme
+import com.kampplus.hava.core.ui.theme.temperatureColor
 import com.kampplus.hava.feature.weather.presentation.model.CityWeatherUiModel
-import com.kampplus.hava.feature.weather.presentation.model.temperatureColor
 
 @Composable
 fun CityWeatherCard(item: CityWeatherUiModel, onClick: () -> Unit, onFavoriteClick: () -> Unit, modifier: Modifier = Modifier) {

@@ -18,8 +18,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.kampplus.hava.core.ui.component.ConditionIcon
+import com.kampplus.hava.core.ui.theme.temperatureColor
 import com.kampplus.hava.feature.weather.presentation.model.DailyUiModel
-import com.kampplus.hava.feature.weather.presentation.model.temperatureColor
 
 /**
  * Günlük tahmin satırı. Sıcaklık aralığı, haftanın en düşük ([rangeMinC]) ve en yüksek ([rangeMaxC])
