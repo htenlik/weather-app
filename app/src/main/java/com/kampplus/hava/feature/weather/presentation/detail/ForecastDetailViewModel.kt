@@ -89,6 +89,7 @@ class ForecastDetailViewModel @Inject constructor(
     }
 
     fun onToggleFavorite() {
+        if (city.isDeviceLocation) return
         viewModelScope.launch { toggleFavoriteCity(city.toFavorite()) }
     }
 

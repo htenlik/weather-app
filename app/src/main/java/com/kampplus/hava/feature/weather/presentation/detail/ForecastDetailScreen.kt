@@ -78,7 +78,9 @@ fun ForecastDetailScreen(
                 },
                 actions = {
                     if (forecast != null) {
-                        FavoriteToggleButton(isFavorite = forecast.isFavorite, onClick = onFavoriteClick, tintOnDark = true)
+                        if (forecast.isFavoritable) {
+                            FavoriteToggleButton(isFavorite = forecast.isFavorite, onClick = onFavoriteClick, tintOnDark = true)
+                        }
                         ShareButton(onClick = { onShare(forecast) })
                     }
                 },

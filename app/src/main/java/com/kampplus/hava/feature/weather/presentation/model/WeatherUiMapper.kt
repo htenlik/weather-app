@@ -94,6 +94,7 @@ class WeatherUiMapper @Inject constructor(
                 )
             },
             isFavorite = isFavorite,
+            isFavoritable = !city.isDeviceLocation,
             icon = conditionUi.icon,
             iconTint = conditionUi.tint,
             isDay = current.isDay,

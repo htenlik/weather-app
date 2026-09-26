@@ -21,6 +21,8 @@ data class ForecastUiModel(
     val hourly: List<HourlyUiModel>,
     val daily: List<DailyUiModel>,
     val isFavorite: Boolean = false,
+    /** Cihaz konumu favorilere eklenemez; kalp ikonu gizlenir. */
+    val isFavoritable: Boolean = true,
     val icon: ImageVector = Icons.Filled.Thermostat,
     val iconTint: Color = WeatherPalette.Fog,
     val isDay: Boolean = true,
