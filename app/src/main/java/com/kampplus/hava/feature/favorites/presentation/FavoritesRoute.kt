@@ -17,6 +17,7 @@ import com.kampplus.hava.feature.favorites.domain.model.FavoriteCity
 @Composable
 fun FavoritesRoute(onCityClick: (FavoriteCity) -> Unit, modifier: Modifier = Modifier, viewModel: FavoritesViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val resources = LocalResources.current
 
@@ -39,6 +40,9 @@ fun FavoritesRoute(onCityClick: (FavoriteCity) -> Unit, modifier: Modifier = Mod
         uiState = uiState,
         onCityClick = { id -> viewModel.findFavorite(id)?.let(onCityClick) },
         onRemoveFavorite = viewModel::onRemoveFavorite,
+        onRetry = viewModel::onRetry,
+        onRefresh = viewModel::onRefresh,
+        isRefreshing = isRefreshing,
         snackbarHostState = snackbarHostState,
         modifier = modifier
     )

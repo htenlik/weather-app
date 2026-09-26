@@ -1,5 +1,9 @@
 package com.kampplus.hava.feature.favorites.presentation
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,6 +19,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -26,15 +31,20 @@ import com.kampplus.hava.core.ui.component.EmptyView
 import com.kampplus.hava.core.ui.component.ErrorView
 import com.kampplus.hava.core.ui.component.LoadingView
 import com.kampplus.hava.core.ui.state.UiState
-import com.kampplus.hava.feature.favorites.presentation.component.FavoriteCityCard
+import com.kampplus.hava.feature.weather.presentation.list.component.CityWeatherCard
+import com.kampplus.hava.feature.weather.presentation.model.CityWeatherUiModel
 
+/** Favori şehirler, anlık havalarıyla. Liste ekranındaki kartın aynısı kullanılır; kalp burada "çıkar" anlamına gelir. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoritesScreen(
-    uiState: UiState<List<FavoriteCityUiModel>>,
+    uiState: UiState<List<CityWeatherUiModel>>,
     onCityClick: (Long) -> Unit,
     onRemoveFavorite: (Long) -> Unit,
+    onRetry: () -> Unit,
+    onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
+    isRefreshing: Boolean = false,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
     Scaffold(
@@ -42,31 +52,44 @@ fun FavoritesScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = { TopAppBar(title = { Text(stringResource(R.string.favorites_title)) }) }
     ) { innerPadding ->
-        Box(
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = onRefresh,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
-            contentAlignment = Alignment.Center
+                .padding(innerPadding)
         ) {
-            when (uiState) {
-                UiState.Loading -> LoadingView()
-                UiState.Empty -> EmptyView(
-                    icon = Icons.Filled.FavoriteBorder,
-                    title = stringResource(R.string.favorites_empty_title),
-                    message = stringResource(R.string.favorites_empty_message)
-                )
-                is UiState.Error -> ErrorView(message = uiState.message.asString())
-                is UiState.Success -> LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(items = uiState.data, key = { it.id }) { item ->
-                        FavoriteCityCard(
-                            item = item,
-                            onClick = { onCityClick(item.id) },
-                            onRemoveClick = { onRemoveFavorite(item.id) }
+            AnimatedContent(
+                targetState = uiState,
+                contentKey = { it::class },
+                transitionSpec = { fadeIn() togetherWith fadeOut() },
+                label = "favoritesState"
+            ) { state ->
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    when (state) {
+                        UiState.Loading -> LoadingView()
+                        UiState.Empty -> EmptyView(
+                            icon = Icons.Filled.FavoriteBorder,
+                            title = stringResource(R.string.favorites_empty_title),
+                            message = stringResource(R.string.favorites_empty_message)
                         )
+
+                        is UiState.Error -> ErrorView(message = state.message.asString(), onRetry = onRetry)
+
+                        is UiState.Success -> LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(items = state.data, key = { it.cityId }) { item ->
+                                CityWeatherCard(
+                                    item = item,
+                                    onClick = { onCityClick(item.cityId) },
+                                    onFavoriteClick = { onRemoveFavorite(item.cityId) },
+                                    modifier = Modifier.animateItem()
+                                )
+                            }
+                        }
                     }
                 }
             }

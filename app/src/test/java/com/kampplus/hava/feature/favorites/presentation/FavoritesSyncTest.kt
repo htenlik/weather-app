@@ -10,6 +10,7 @@ import com.kampplus.hava.feature.favorites.domain.usecase.ObserveFavoriteCitiesU
 import com.kampplus.hava.feature.favorites.domain.usecase.ObserveFavoriteCityIdsUseCase
 import com.kampplus.hava.feature.favorites.domain.usecase.ToggleFavoriteCityUseCase
 import com.kampplus.hava.feature.weather.domain.usecase.GetCityWeathersUseCase
+import com.kampplus.hava.feature.weather.domain.usecase.GetCurrentWeatherUseCase
 import com.kampplus.hava.feature.weather.domain.usecase.GetForecastUseCase
 import com.kampplus.hava.feature.weather.domain.usecase.SearchCityWeathersUseCase
 import com.kampplus.hava.feature.weather.presentation.detail.ForecastDetailViewModel
@@ -75,7 +76,14 @@ class FavoritesSyncTest {
             uiMapper = testUiMapper()
         )
     }
-    private val favoritesViewModel by lazy { FavoritesViewModel(ObserveFavoriteCitiesUseCase(favoritesRepository), toggle) }
+    private val favoritesViewModel by lazy {
+        FavoritesViewModel(
+            observeFavoriteCities = ObserveFavoriteCitiesUseCase(favoritesRepository),
+            getCurrentWeather = GetCurrentWeatherUseCase(weatherRepository),
+            toggleFavoriteCity = toggle,
+            uiMapper = testUiMapper()
+        )
+    }
 
     @Test
     fun `adding from list is reflected on detail and favorites screens`() = runTest {
@@ -86,7 +94,7 @@ class FavoritesSyncTest {
 
         assertTrue(listIsFavorite())
         assertTrue(detailIsFavorite())
-        assertEquals(listOf(ankara.id), (favoritesViewModel.uiState.value as UiState.Success).data.map { it.id })
+        assertEquals(listOf(ankara.id), (favoritesViewModel.uiState.value as UiState.Success).data.map { it.cityId })
     }
 
     @Test
