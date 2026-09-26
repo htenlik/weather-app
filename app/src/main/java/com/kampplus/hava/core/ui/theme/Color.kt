@@ -29,3 +29,14 @@ object TemperaturePalette {
     val Warm = Color(0xFFEF6C00)
     val Hot = Color(0xFFC62828)
 }
+
+/** Hava koşulu vurgu renkleri; ikon tonu ve detay başlığındaki gradient buradan türetilir. */
+object WeatherPalette {
+    val Sun = Color(0xFFF59E0B)
+    val Night = Color(0xFF3F51B5)
+    val Cloud = Color(0xFF78909C)
+    val Fog = Color(0xFF9E9E9E)
+    val Rain = Color(0xFF1E88E5)
+    val Snow = Color(0xFF4FC3F7)
+    val Storm = Color(0xFF5E35B1)
+}
