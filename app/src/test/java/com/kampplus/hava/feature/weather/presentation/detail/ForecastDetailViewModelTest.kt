@@ -16,6 +16,7 @@ import com.kampplus.hava.feature.settings.domain.model.TemperatureUnit
 import com.kampplus.hava.feature.settings.domain.model.UserSettings
 import com.kampplus.hava.feature.settings.domain.usecase.ObserveSettingsUseCase
 import com.kampplus.hava.feature.weather.domain.usecase.GetForecastUseCase
+import com.kampplus.hava.testing.FakeNetworkMonitor
 import com.kampplus.hava.testing.FakeSettingsRepository
 import com.kampplus.hava.testing.FakeWeatherRepository
 import com.kampplus.hava.testing.MainDispatcherRule
@@ -51,6 +52,7 @@ class ForecastDetailViewModelTest {
         observeFavoriteCityIds = ObserveFavoriteCityIdsUseCase(favoritesRepository),
         toggleFavoriteCity = ToggleFavoriteCityUseCase(favoritesRepository),
         observeSettings = ObserveSettingsUseCase(settingsRepository),
+        networkMonitor = FakeNetworkMonitor(),
         uiMapper = testUiMapper()
     )
 
@@ -64,6 +66,7 @@ class ForecastDetailViewModelTest {
             assertEquals("İzmir", model.cityName)
             assertEquals("21°", model.temperatureText)
             assertEquals("12 km/sa", model.windText)
+            assertEquals("12:05", model.updatedAtText)
         }
         val requested = repository.requestedForecasts.single()
         assertEquals(38.4127, requested.coordinates.latitude, 0.0)

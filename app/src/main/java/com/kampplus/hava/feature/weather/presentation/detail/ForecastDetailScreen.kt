@@ -136,12 +136,16 @@ private fun ForecastContent(forecast: ForecastUiModel, modifier: Modifier = Modi
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         HeroHeader(forecast = forecast)
-        Text(
-            text = forecast.subtitle,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
+        Column(modifier = Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(text = forecast.subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            forecast.updatedAtText?.let { updatedAt ->
+                Text(
+                    text = stringResource(R.string.updated_at, updatedAt),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
         SectionTitle(text = stringResource(R.string.detail_hourly))
         HourlyForecastRow(items = forecast.hourly)
         SectionTitle(text = stringResource(R.string.detail_daily))

@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.kampplus.hava.core.ui.theme.HavaTheme
@@ -46,8 +47,9 @@ class MainActivity : ComponentActivity() {
             if (current != null) {
                 val darkTheme = current.themeMode.shouldUseDarkTheme()
                 SystemBarsFollowTheme(darkTheme)
+                val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
                 HavaTheme(darkTheme = darkTheme, dynamicColor = current.dynamicColor) {
-                    HavaApp()
+                    HavaApp(isOnline = isOnline)
                 }
             }
         }

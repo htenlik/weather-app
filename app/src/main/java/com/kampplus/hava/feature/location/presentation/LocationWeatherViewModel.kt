@@ -3,6 +3,8 @@ package com.kampplus.hava.feature.location.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kampplus.hava.core.common.error.AppError
+import com.kampplus.hava.core.common.network.NetworkMonitor
+import com.kampplus.hava.core.common.network.onReconnect
 import com.kampplus.hava.core.common.result.AppResult
 import com.kampplus.hava.core.ui.text.toUiText
 import com.kampplus.hava.feature.location.domain.usecase.GetLocationWeatherUseCase
@@ -28,6 +30,7 @@ import kotlinx.coroutines.launch
 class LocationWeatherViewModel @Inject constructor(
     private val getLocationWeather: GetLocationWeatherUseCase,
     observeSettings: ObserveSettingsUseCase,
+    networkMonitor: NetworkMonitor,
     private val uiMapper: WeatherUiMapper
 ) : ViewModel() {
 
@@ -57,6 +60,12 @@ class LocationWeatherViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
         initialValue = LocationUiState.Locating
     )
+
+    init {
+        viewModelScope.launch {
+            networkMonitor.onReconnect().collect { if (uiState.value is LocationUiState.Error) load() }
+        }
+    }
 
     /** Detaya giderken kullanılan şehir; yalnızca konum ve hava alınmışsa vardır. */
     val city: City? get() = (result.value as? AppResult.Success)?.data?.city

@@ -8,6 +8,7 @@ import com.kampplus.hava.core.ui.text.UiText
 import com.kampplus.hava.feature.location.domain.usecase.GetLocationWeatherUseCase
 import com.kampplus.hava.feature.settings.domain.usecase.ObserveSettingsUseCase
 import com.kampplus.hava.testing.FakeLocationRepository
+import com.kampplus.hava.testing.FakeNetworkMonitor
 import com.kampplus.hava.testing.FakeSettingsRepository
 import com.kampplus.hava.testing.FakeWeatherRepository
 import com.kampplus.hava.testing.MainDispatcherRule
@@ -33,6 +34,7 @@ class LocationWeatherViewModelTest {
     private fun createViewModel() = LocationWeatherViewModel(
         getLocationWeather = GetLocationWeatherUseCase(locationRepository, weatherRepository),
         observeSettings = ObserveSettingsUseCase(FakeSettingsRepository()),
+        networkMonitor = FakeNetworkMonitor(),
         uiMapper = testUiMapper()
     )
 

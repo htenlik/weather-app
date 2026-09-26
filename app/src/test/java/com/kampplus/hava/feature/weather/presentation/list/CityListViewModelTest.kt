@@ -14,6 +14,7 @@ import com.kampplus.hava.feature.settings.domain.usecase.ObserveSettingsUseCase
 import com.kampplus.hava.feature.weather.domain.usecase.GetCityWeathersUseCase
 import com.kampplus.hava.feature.weather.domain.usecase.SearchCityWeathersUseCase
 import com.kampplus.hava.testing.FakeCityRepository
+import com.kampplus.hava.testing.FakeNetworkMonitor
 import com.kampplus.hava.testing.FakeSettingsRepository
 import com.kampplus.hava.testing.FakeWeatherRepository
 import com.kampplus.hava.testing.MainDispatcherRule
@@ -41,6 +42,7 @@ class CityListViewModelTest {
     private val cityRepository = FakeCityRepository()
     private val favoritesRepository = FavoriteCityRepositoryImpl(InMemoryFavoriteCityDataSource())
     private val settingsRepository = FakeSettingsRepository()
+    private val networkMonitor = FakeNetworkMonitor()
 
     private fun createViewModel() = CityListViewModel(
         getCityWeathers = GetCityWeathersUseCase(repository),
@@ -48,6 +50,7 @@ class CityListViewModelTest {
         observeFavoriteCityIds = ObserveFavoriteCityIdsUseCase(favoritesRepository),
         toggleFavoriteCity = ToggleFavoriteCityUseCase(favoritesRepository),
         observeSettings = ObserveSettingsUseCase(settingsRepository),
+        networkMonitor = networkMonitor,
         uiMapper = testUiMapper()
     )
 
@@ -175,6 +178,26 @@ class CityListViewModelTest {
         val state = viewModel.uiState.value
         assertFalse(state.isRefreshing)
         assertEquals("25°", (state.content as UiState.Success).data.single().temperatureText)
+    }
+
+    @Test
+    fun `retries automatically when the connection comes back`() = runTest {
+        var shouldFail = true
+        repository.cityWeathersResult =
+            { if (shouldFail) AppResult.Failure(AppError.Network) else AppResult.Success(listOf(cityWeather())) }
+        val viewModel = createViewModel().alsoSubscribe(this)
+        assertTrue(viewModel.uiState.value.content is UiState.Error)
+
+        shouldFail = false
+        networkMonitor.online.value = false
+        runCurrent()
+        assertTrue("bağlantı kopunca yeniden denenmez", viewModel.uiState.value.content is UiState.Error)
+
+        networkMonitor.online.value = true
+        runCurrent()
+
+        assertTrue(viewModel.uiState.value.content is UiState.Success)
+        assertEquals("12:05", viewModel.uiState.value.updatedAtText)
     }
 
     @Test

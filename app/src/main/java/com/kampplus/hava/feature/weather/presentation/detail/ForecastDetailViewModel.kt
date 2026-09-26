@@ -3,6 +3,8 @@ package com.kampplus.hava.feature.weather.presentation.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kampplus.hava.core.common.network.NetworkMonitor
+import com.kampplus.hava.core.common.network.onReconnect
 import com.kampplus.hava.core.common.result.AppResult
 import com.kampplus.hava.core.navigation.ForecastDestination
 import com.kampplus.hava.core.ui.state.UiState
@@ -34,6 +36,7 @@ class ForecastDetailViewModel @Inject constructor(
     observeFavoriteCityIds: ObserveFavoriteCityIdsUseCase,
     private val toggleFavoriteCity: ToggleFavoriteCityUseCase,
     observeSettings: ObserveSettingsUseCase,
+    networkMonitor: NetworkMonitor,
     private val uiMapper: WeatherUiMapper
 ) : ViewModel() {
 
@@ -75,6 +78,9 @@ class ForecastDetailViewModel @Inject constructor(
 
     init {
         load()
+        viewModelScope.launch {
+            networkMonitor.onReconnect().collect { if (uiState.value is UiState.Error) load() }
+        }
     }
 
     fun onRetry() = load()

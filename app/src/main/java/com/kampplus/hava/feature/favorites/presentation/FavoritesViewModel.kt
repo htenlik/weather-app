@@ -3,6 +3,8 @@ package com.kampplus.hava.feature.favorites.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kampplus.hava.core.common.error.AppError
+import com.kampplus.hava.core.common.network.NetworkMonitor
+import com.kampplus.hava.core.common.network.onReconnect
 import com.kampplus.hava.core.common.result.AppResult
 import com.kampplus.hava.core.ui.state.UiState
 import com.kampplus.hava.core.ui.text.toUiText
@@ -43,6 +45,7 @@ class FavoritesViewModel @Inject constructor(
     private val getCurrentWeather: GetCurrentWeatherUseCase,
     private val toggleFavoriteCity: ToggleFavoriteCityUseCase,
     observeSettings: ObserveSettingsUseCase,
+    networkMonitor: NetworkMonitor,
     private val uiMapper: WeatherUiMapper
 ) : ViewModel() {
 
@@ -88,6 +91,12 @@ class FavoritesViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
         initialValue = UiState.Loading
     )
+
+    init {
+        viewModelScope.launch {
+            networkMonitor.onReconnect().collect { if (uiState.value is UiState.Error) onRetry() }
+        }
+    }
 
     fun findFavorite(id: Long): FavoriteCity? = favoritesById[id]
 
