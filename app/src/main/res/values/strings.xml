@@ -19,6 +19,8 @@
     <string name="today">Bugün</string>
     <string name="detail_hourly">Saatlik</string>
     <string name="detail_daily">7 Günlük</string>
+    <string name="detail_now">Şimdi</string>
+    <string name="detail_today_range">En yüksek %1$s · En düşük %2$s</string>
     <string name="detail_feels_like">Hissedilen</string>
     <string name="detail_humidity">Nem</string>
     <string name="detail_wind">Rüzgâr</string>

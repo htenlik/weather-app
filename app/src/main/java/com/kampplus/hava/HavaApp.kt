@@ -1,5 +1,6 @@
 package com.kampplus.hava
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -23,6 +24,8 @@ fun HavaApp(modifier: Modifier = Modifier) {
 
     Scaffold(
         modifier = modifier,
+        // Durum çubuğu insets'i ekranların kendi üst çubuklarına bırakılır; böylece renkli başlıklar kenara kadar uzanır.
+        contentWindowInsets = WindowInsets(0),
         bottomBar = {
             if (isTopLevel) {
                 BottomBar(
