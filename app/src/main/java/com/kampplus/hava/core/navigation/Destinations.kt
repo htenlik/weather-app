@@ -9,6 +9,9 @@ data object ListDestination
 @Serializable
 data object FavoritesDestination
 
+@Serializable
+data object SettingsDestination
+
 /**
  * Tahmin ekranı. Şehrin koordinatları argüman olarak taşınır; böylece detay ekranı
  * ek bir "şehir getir" isteğine ihtiyaç duymaz.
