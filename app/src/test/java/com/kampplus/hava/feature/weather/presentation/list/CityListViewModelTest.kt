@@ -8,9 +8,13 @@ import com.kampplus.hava.feature.favorites.data.local.InMemoryFavoriteCityDataSo
 import com.kampplus.hava.feature.favorites.data.repository.FavoriteCityRepositoryImpl
 import com.kampplus.hava.feature.favorites.domain.usecase.ObserveFavoriteCityIdsUseCase
 import com.kampplus.hava.feature.favorites.domain.usecase.ToggleFavoriteCityUseCase
+import com.kampplus.hava.feature.settings.domain.model.TemperatureUnit
+import com.kampplus.hava.feature.settings.domain.model.UserSettings
+import com.kampplus.hava.feature.settings.domain.usecase.ObserveSettingsUseCase
 import com.kampplus.hava.feature.weather.domain.usecase.GetCityWeathersUseCase
 import com.kampplus.hava.feature.weather.domain.usecase.SearchCityWeathersUseCase
 import com.kampplus.hava.testing.FakeCityRepository
+import com.kampplus.hava.testing.FakeSettingsRepository
 import com.kampplus.hava.testing.FakeWeatherRepository
 import com.kampplus.hava.testing.MainDispatcherRule
 import com.kampplus.hava.testing.city
@@ -36,12 +40,14 @@ class CityListViewModelTest {
     private val repository = FakeWeatherRepository()
     private val cityRepository = FakeCityRepository()
     private val favoritesRepository = FavoriteCityRepositoryImpl(InMemoryFavoriteCityDataSource())
+    private val settingsRepository = FakeSettingsRepository()
 
     private fun createViewModel() = CityListViewModel(
         getCityWeathers = GetCityWeathersUseCase(repository),
         searchCityWeathers = SearchCityWeathersUseCase(cityRepository, repository),
         observeFavoriteCityIds = ObserveFavoriteCityIdsUseCase(favoritesRepository),
         toggleFavoriteCity = ToggleFavoriteCityUseCase(favoritesRepository),
+        observeSettings = ObserveSettingsUseCase(settingsRepository),
         uiMapper = testUiMapper()
     )
 
@@ -169,6 +175,18 @@ class CityListViewModelTest {
         val state = viewModel.uiState.value
         assertFalse(state.isRefreshing)
         assertEquals("25°", (state.content as UiState.Success).data.single().temperatureText)
+    }
+
+    @Test
+    fun `shows temperatures in the selected unit`() = runTest {
+        repository.cityWeathersResult = { AppResult.Success(listOf(cityWeather(temperatureC = 26.6))) }
+        val viewModel = createViewModel().alsoSubscribe(this)
+        assertEquals("27°", (viewModel.uiState.value.content as UiState.Success).data.single().temperatureText)
+
+        settingsRepository.state.value = UserSettings(temperatureUnit = TemperatureUnit.Fahrenheit)
+        runCurrent()
+
+        assertEquals("80°", (viewModel.uiState.value.content as UiState.Success).data.single().temperatureText)
     }
 
     /** stateIn(WhileSubscribed) akışını ekran açıkmış gibi aktif tutar. */

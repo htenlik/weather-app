@@ -7,6 +7,7 @@ import com.kampplus.hava.core.ui.state.UiState
 import com.kampplus.hava.core.ui.text.toUiText
 import com.kampplus.hava.feature.favorites.domain.usecase.ObserveFavoriteCityIdsUseCase
 import com.kampplus.hava.feature.favorites.domain.usecase.ToggleFavoriteCityUseCase
+import com.kampplus.hava.feature.settings.domain.usecase.ObserveSettingsUseCase
 import com.kampplus.hava.feature.weather.domain.model.City
 import com.kampplus.hava.feature.weather.domain.model.CityWeather
 import com.kampplus.hava.feature.weather.domain.usecase.GetCityWeathersUseCase
@@ -39,6 +40,7 @@ class CityListViewModel @Inject constructor(
     private val searchCityWeathers: SearchCityWeathersUseCase,
     observeFavoriteCityIds: ObserveFavoriteCityIdsUseCase,
     private val toggleFavoriteCity: ToggleFavoriteCityUseCase,
+    observeSettings: ObserveSettingsUseCase,
     private val uiMapper: WeatherUiMapper
 ) : ViewModel() {
 
@@ -79,8 +81,9 @@ class CityListViewModel @Inject constructor(
         query,
         results,
         observeFavoriteCityIds(),
-        isRefreshing
-    ) { query, result, favoriteIds, refreshing ->
+        isRefreshing,
+        observeSettings()
+    ) { query, result, favoriteIds, refreshing, settings ->
         CityListUiState(
             query = query,
             content = when (result) {
@@ -89,7 +92,11 @@ class CityListViewModel @Inject constructor(
                     if (result.data.isEmpty()) {
                         UiState.Empty
                     } else {
-                        UiState.Success(result.data.map { uiMapper.toListItem(it, isFavorite = it.city.id in favoriteIds) })
+                        UiState.Success(
+                            result.data.map { weather ->
+                                uiMapper.toListItem(weather, isFavorite = weather.city.id in favoriteIds, unit = settings.temperatureUnit)
+                            }
+                        )
                     }
                 is AppResult.Failure -> UiState.Error(result.error.toUiText())
             },

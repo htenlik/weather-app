@@ -30,6 +30,7 @@
     <string name="action_remove_favorite">Favorilerden çıkar</string>
     <string name="nav_list">Şehirler</string>
     <string name="nav_favorites">Favoriler</string>
+    <string name="nav_settings">Ayarlar</string>
     <string name="favorites_title">Favori Şehirlerim</string>
     <string name="favorites_empty_title">Henüz favori şehrin yok</string>
     <string name="favorites_empty_message">Listede ya da tahmin ekranında kalp ikonuna dokunarak şehirleri buraya ekleyebilirsin.</string>
@@ -45,4 +46,25 @@
     <string name="search_hint">Şehir ara (ör. Berlin, Rize)</string>
     <string name="action_clear">Temizle</string>
     <string name="search_empty_message">“%1$s” için şehir bulunamadı.</string>
+    <string name="settings_title">Ayarlar</string>
+    <string name="settings_section_appearance">Görünüm</string>
+    <string name="settings_theme">Tema</string>
+    <string name="settings_theme_system">Sistem</string>
+    <string name="settings_theme_light">Açık</string>
+    <string name="settings_theme_dark">Koyu</string>
+    <string name="settings_dynamic_color">Dinamik renk</string>
+    <string name="settings_dynamic_color_description">Duvar kâğıdından türeyen Material You renkleri</string>
+    <string name="settings_dynamic_color_unavailable">Android 12 ve üzeri gerektirir</string>
+    <string name="settings_section_units">Birimler</string>
+    <string name="settings_temperature_unit">Sıcaklık birimi</string>
+    <string name="settings_unit_celsius">°C</string>
+    <string name="settings_unit_fahrenheit">°F</string>
+    <string name="settings_section_about">Hakkında</string>
+    <string name="settings_version">Sürüm</string>
+    <string name="settings_data_source">Veri kaynağı</string>
+    <string name="settings_data_source_description">Open-Meteo · ücretsiz, anahtar gerektirmeyen hava durumu API’si</string>
+    <string name="settings_source_code">Kaynak kodu</string>
+    <string name="settings_source_code_description">GitHub’da görüntüle</string>
+    <string name="settings_made_with">Kotlin ve Jetpack Compose ile geliştirildi · KAMP+ Bilişim Kampı</string>
+    <string name="error_no_browser">Bağlantıyı açacak bir uygulama bulunamadı.</string>
 </resources>

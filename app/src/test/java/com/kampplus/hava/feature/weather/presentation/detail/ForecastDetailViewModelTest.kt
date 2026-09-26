@@ -12,7 +12,11 @@ import com.kampplus.hava.feature.favorites.data.local.InMemoryFavoriteCityDataSo
 import com.kampplus.hava.feature.favorites.data.repository.FavoriteCityRepositoryImpl
 import com.kampplus.hava.feature.favorites.domain.usecase.ObserveFavoriteCityIdsUseCase
 import com.kampplus.hava.feature.favorites.domain.usecase.ToggleFavoriteCityUseCase
+import com.kampplus.hava.feature.settings.domain.model.TemperatureUnit
+import com.kampplus.hava.feature.settings.domain.model.UserSettings
+import com.kampplus.hava.feature.settings.domain.usecase.ObserveSettingsUseCase
 import com.kampplus.hava.feature.weather.domain.usecase.GetForecastUseCase
+import com.kampplus.hava.testing.FakeSettingsRepository
 import com.kampplus.hava.testing.FakeWeatherRepository
 import com.kampplus.hava.testing.MainDispatcherRule
 import com.kampplus.hava.testing.forecast
@@ -30,6 +34,7 @@ class ForecastDetailViewModelTest {
 
     private val repository = FakeWeatherRepository()
     private val favoritesRepository = FavoriteCityRepositoryImpl(InMemoryFavoriteCityDataSource())
+    private val settingsRepository = FakeSettingsRepository()
 
     private fun createViewModel() = ForecastDetailViewModel(
         savedStateHandle = SavedStateHandle(
@@ -45,6 +50,7 @@ class ForecastDetailViewModelTest {
         getForecast = GetForecastUseCase(repository),
         observeFavoriteCityIds = ObserveFavoriteCityIdsUseCase(favoritesRepository),
         toggleFavoriteCity = ToggleFavoriteCityUseCase(favoritesRepository),
+        observeSettings = ObserveSettingsUseCase(settingsRepository),
         uiMapper = testUiMapper()
     )
 
@@ -75,6 +81,36 @@ class ForecastDetailViewModelTest {
             assertEquals("12:00", model.hourly.first().timeText)
             assertEquals(UiText.Resource(R.string.today), model.daily.first().dayLabel)
             assertEquals("%30", model.daily.first().precipitationText)
+        }
+    }
+
+    @Test
+    fun `formats every temperature in the selected unit`() = runTest {
+        repository.forecastResult = { AppResult.Success(forecast()) }
+        settingsRepository.state.value = UserSettings(temperatureUnit = TemperatureUnit.Fahrenheit)
+
+        createViewModel().uiState.test {
+            awaitItem()
+            val model = (awaitItem() as UiState.Success).data
+            assertEquals("71°", model.temperatureText)
+            assertEquals("68°", model.feelsLikeText)
+            assertEquals("54°", model.daily.first().minText)
+            assertEquals("75°", model.daily.first().maxText)
+            assertEquals(21.4, model.temperatureC, 0.0)
+        }
+    }
+
+    @Test
+    fun `switches unit live when the setting changes`() = runTest {
+        repository.forecastResult = { AppResult.Success(forecast()) }
+
+        createViewModel().uiState.test {
+            awaitItem()
+            assertEquals("21°", (awaitItem() as UiState.Success).data.temperatureText)
+
+            settingsRepository.state.value = UserSettings(temperatureUnit = TemperatureUnit.Fahrenheit)
+
+            assertEquals("71°", (awaitItem() as UiState.Success).data.temperatureText)
         }
     }
 

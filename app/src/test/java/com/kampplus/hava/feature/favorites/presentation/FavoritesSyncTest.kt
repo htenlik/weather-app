@@ -9,6 +9,7 @@ import com.kampplus.hava.feature.favorites.data.repository.FavoriteCityRepositor
 import com.kampplus.hava.feature.favorites.domain.usecase.ObserveFavoriteCitiesUseCase
 import com.kampplus.hava.feature.favorites.domain.usecase.ObserveFavoriteCityIdsUseCase
 import com.kampplus.hava.feature.favorites.domain.usecase.ToggleFavoriteCityUseCase
+import com.kampplus.hava.feature.settings.domain.usecase.ObserveSettingsUseCase
 import com.kampplus.hava.feature.weather.domain.usecase.GetCityWeathersUseCase
 import com.kampplus.hava.feature.weather.domain.usecase.GetCurrentWeatherUseCase
 import com.kampplus.hava.feature.weather.domain.usecase.GetForecastUseCase
@@ -16,6 +17,7 @@ import com.kampplus.hava.feature.weather.domain.usecase.SearchCityWeathersUseCas
 import com.kampplus.hava.feature.weather.presentation.detail.ForecastDetailViewModel
 import com.kampplus.hava.feature.weather.presentation.list.CityListViewModel
 import com.kampplus.hava.testing.FakeCityRepository
+import com.kampplus.hava.testing.FakeSettingsRepository
 import com.kampplus.hava.testing.FakeWeatherRepository
 import com.kampplus.hava.testing.MainDispatcherRule
 import com.kampplus.hava.testing.city
@@ -47,6 +49,7 @@ class FavoritesSyncTest {
     private val favoritesRepository = FavoriteCityRepositoryImpl(InMemoryFavoriteCityDataSource())
     private val observeIds = ObserveFavoriteCityIdsUseCase(favoritesRepository)
     private val toggle = ToggleFavoriteCityUseCase(favoritesRepository)
+    private val observeSettings = ObserveSettingsUseCase(FakeSettingsRepository())
 
     // Lazy: ViewModel'ler MainDispatcherRule, Main dispatcher'ı değiştirdikten sonra oluşturulmalı.
     private val listViewModel by lazy {
@@ -55,6 +58,7 @@ class FavoritesSyncTest {
             searchCityWeathers = SearchCityWeathersUseCase(FakeCityRepository(), weatherRepository),
             observeFavoriteCityIds = observeIds,
             toggleFavoriteCity = toggle,
+            observeSettings = observeSettings,
             uiMapper = testUiMapper()
         )
     }
@@ -73,6 +77,7 @@ class FavoritesSyncTest {
             getForecast = GetForecastUseCase(weatherRepository),
             observeFavoriteCityIds = observeIds,
             toggleFavoriteCity = toggle,
+            observeSettings = observeSettings,
             uiMapper = testUiMapper()
         )
     }
@@ -81,6 +86,7 @@ class FavoritesSyncTest {
             observeFavoriteCities = ObserveFavoriteCitiesUseCase(favoritesRepository),
             getCurrentWeather = GetCurrentWeatherUseCase(weatherRepository),
             toggleFavoriteCity = toggle,
+            observeSettings = observeSettings,
             uiMapper = testUiMapper()
         )
     }
