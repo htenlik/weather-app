@@ -64,8 +64,8 @@ class WeatherUiMapper @Inject constructor(
             conditionEmoji = conditionUi.emoji,
             conditionLabel = conditionUi.label,
             feelsLikeText = current.apparentTemperatureC?.let { degrees(it, unit) },
-            humidityText = current.humidityPercent?.let { "%$it" },
-            windText = current.windSpeedKmh?.let { "${it.roundToInt()} km/sa" },
+            humidityText = current.humidityPercent?.let(::percent),
+            windText = current.windSpeedKmh?.let { UiText.Resource(R.string.wind_speed_value, it.roundToInt()) },
             hourly = hourly.filter { !it.time.isBefore(currentHour) }.take(HOURLY_COUNT).mapIndexed { index, hour ->
                 // Gece/gündüz saat bazında bilinmediği için anlık değere göre karar verilir.
                 val hourUi = conditionUi(hour.weatherCode, current.isDay)
@@ -85,7 +85,7 @@ class WeatherUiMapper @Inject constructor(
                     dayLabel = if (index == 0) {
                         UiText.Resource(R.string.today)
                     } else {
-                        UiText.Dynamic(day.date.format(DAY_FORMAT).replaceFirstChar(Char::titlecase))
+                        UiText.Dynamic(day.date.format(dayFormat()).replaceFirstChar(Char::titlecase))
                     },
                     emoji = dayUi.emoji,
                     minText = degrees(day.minTemperatureC, unit),
@@ -111,7 +111,7 @@ class WeatherUiMapper @Inject constructor(
     /** Verinin alınma anı, cihaz saatiyle: bugünse yalnızca saat, değilse gün ve ay da gösterilir. */
     fun updatedAtText(fetchedAt: Instant): String {
         val local = fetchedAt.atZone(clock.zone)
-        val pattern = if (local.toLocalDate() == LocalDate.now(clock)) UPDATED_TIME_FORMAT else UPDATED_DATE_TIME_FORMAT
+        val pattern = if (local.toLocalDate() == LocalDate.now(clock)) UPDATED_TIME_FORMAT else updatedDateTimeFormat()
         return local.format(pattern)
     }
 
@@ -122,13 +122,16 @@ class WeatherUiMapper @Inject constructor(
 
     private fun degrees(celsius: Double, unit: TemperatureUnit) = "${unit.fromCelsius(celsius).roundToInt()}°"
 
-    private fun percent(value: Int?) = value?.takeIf { it > 0 }?.let { "%$it" }
+    private fun percent(value: Int?): UiText? = value?.takeIf { it > 0 }?.let { UiText.Resource(R.string.percent_value, it) }
+
+    // Gün ve ay adları cihaz diline göre; dil değişince süreç ölmeyebileceği için her seferinde okunur.
+    private fun dayFormat(): DateTimeFormatter = DateTimeFormatter.ofPattern("EEEE", Locale.getDefault())
+
+    private fun updatedDateTimeFormat(): DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM HH:mm", Locale.getDefault())
 
     private companion object {
         const val HOURLY_COUNT = 24
         val HOUR_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-        val DAY_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("EEEE", Locale.forLanguageTag("tr"))
         val UPDATED_TIME_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-        val UPDATED_DATE_TIME_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM HH:mm", Locale.forLanguageTag("tr"))
     }
 }

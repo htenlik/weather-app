@@ -81,10 +81,10 @@ fun HeroHeader(forecast: ForecastUiModel, modifier: Modifier = Modifier) {
                 MetricChip(icon = Icons.Filled.Thermostat, label = stringResource(R.string.detail_feels_like), value = it)
             }
             forecast.humidityText?.let {
-                MetricChip(icon = Icons.Filled.WaterDrop, label = stringResource(R.string.detail_humidity), value = it)
+                MetricChip(icon = Icons.Filled.WaterDrop, label = stringResource(R.string.detail_humidity), value = it.asString())
             }
             forecast.windText?.let {
-                MetricChip(icon = Icons.Filled.Air, label = stringResource(R.string.detail_wind), value = it)
+                MetricChip(icon = Icons.Filled.Air, label = stringResource(R.string.detail_wind), value = it.asString())
             }
         }
     }

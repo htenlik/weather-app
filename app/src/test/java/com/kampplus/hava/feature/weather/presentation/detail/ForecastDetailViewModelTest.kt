@@ -65,7 +65,7 @@ class ForecastDetailViewModelTest {
             val model = (awaitItem() as UiState.Success).data
             assertEquals("İzmir", model.cityName)
             assertEquals("21°", model.temperatureText)
-            assertEquals("12 km/sa", model.windText)
+            assertEquals(UiText.Resource(R.string.wind_speed_value, 12), model.windText)
             assertEquals("12:05", model.updatedAtText)
         }
         val requested = repository.requestedForecasts.single()
@@ -83,7 +83,7 @@ class ForecastDetailViewModelTest {
             assertEquals(24, model.hourly.size)
             assertEquals("12:00", model.hourly.first().timeText)
             assertEquals(UiText.Resource(R.string.today), model.daily.first().dayLabel)
-            assertEquals("%30", model.daily.first().precipitationText)
+            assertEquals(UiText.Resource(R.string.percent_value, 30), model.daily.first().precipitationText)
         }
     }
 

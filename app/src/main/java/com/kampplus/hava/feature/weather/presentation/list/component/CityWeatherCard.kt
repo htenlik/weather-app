@@ -30,7 +30,8 @@ fun CityWeatherCard(item: CityWeatherUiModel, onClick: () -> Unit, onFavoriteCli
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            ConditionIcon(icon = item.icon, tint = item.iconTint, contentDescription = item.conditionLabel.asString())
+            // Koşul metni kartta zaten okunur; ikon ayrıca seslendirilmez.
+            ConditionIcon(icon = item.icon, tint = item.iconTint)
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = item.title,

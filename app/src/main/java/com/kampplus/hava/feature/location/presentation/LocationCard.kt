@@ -95,7 +95,7 @@ private fun LocationWeatherCard(item: CityWeatherUiModel, onClick: () -> Unit, m
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            ConditionIcon(icon = item.icon, tint = item.iconTint, contentDescription = item.conditionLabel.asString())
+            ConditionIcon(icon = item.icon, tint = item.iconTint)
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Icon(

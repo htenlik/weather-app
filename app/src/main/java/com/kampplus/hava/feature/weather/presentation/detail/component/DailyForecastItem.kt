@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,6 +15,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.kampplus.hava.core.ui.component.ConditionIcon
@@ -28,26 +29,28 @@ import com.kampplus.hava.feature.weather.presentation.model.DailyUiModel
 @Composable
 fun DailyForecastItem(day: DailyUiModel, rangeMinC: Double, rangeMaxC: Double, modifier: Modifier = Modifier) {
     Row(
+        // Satır tek parça okunur: "Salı, sağanak yağış, %85, 17°, 19°". Büyük yazı tipinde metinler genişleyebilir.
         modifier = modifier
             .fillMaxWidth()
+            .semantics(mergeDescendants = true) {}
             .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = day.dayLabel.asString(), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.width(92.dp))
+        Text(text = day.dayLabel.asString(), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.widthIn(min = 92.dp))
         ConditionIcon(icon = day.icon, tint = day.iconTint, size = 32.dp)
         Text(
-            text = day.precipitationText.orEmpty(),
+            text = day.precipitationText?.asString().orEmpty(),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier
-                .width(44.dp)
+                .widthIn(min = 44.dp)
                 .padding(start = 6.dp)
         )
         Text(
             text = day.minText,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.width(36.dp),
+            modifier = Modifier.widthIn(min = 36.dp),
             textAlign = TextAlign.End
         )
         TemperatureRangeBar(
@@ -59,7 +62,12 @@ fun DailyForecastItem(day: DailyUiModel, rangeMinC: Double, rangeMaxC: Double, m
                 .weight(1f)
                 .padding(horizontal = 8.dp)
         )
-        Text(text = day.maxText, style = MaterialTheme.typography.titleMedium, modifier = Modifier.width(36.dp), textAlign = TextAlign.End)
+        Text(
+            text = day.maxText,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.widthIn(min = 36.dp),
+            textAlign = TextAlign.End
+        )
     }
 }
 
