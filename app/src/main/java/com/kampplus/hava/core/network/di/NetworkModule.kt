@@ -2,6 +2,9 @@ package com.kampplus.hava.core.network.di
 
 import android.content.Context
 import com.kampplus.hava.BuildConfig
+import com.kampplus.hava.core.common.network.NetworkMonitor
+import com.kampplus.hava.core.network.cache.CacheControlInterceptor
+import com.kampplus.hava.core.network.cache.OfflineCacheInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -40,11 +43,14 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(@ApplicationContext context: Context): OkHttpClient = OkHttpClient.Builder()
+    fun provideOkHttpClient(@ApplicationContext context: Context, networkMonitor: NetworkMonitor): OkHttpClient = OkHttpClient.Builder()
         .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
         .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
         // Kamp salonunda 20 cihaz aynı API'ye gider; HTTP cache gereksiz istekleri azaltır.
+        // Aynı cache çevrimdışı modun da temelidir: son yanıt saklanır, bağlantı yokken oradan sunulur.
         .cache(Cache(File(context.cacheDir, "http"), CACHE_SIZE_BYTES))
+        .addInterceptor(OfflineCacheInterceptor(networkMonitor))
+        .addNetworkInterceptor(CacheControlInterceptor())
         .apply {
             if (BuildConfig.DEBUG) {
                 addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
