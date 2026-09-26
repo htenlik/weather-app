@@ -2,6 +2,7 @@ package com.kampplus.hava.feature.weather.data.remote
 
 import com.kampplus.hava.core.network.di.NetworkModule
 import com.kampplus.hava.feature.weather.data.remote.api.OpenMeteoGeocodingApi
+import java.util.Locale
 import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -16,9 +17,12 @@ class OpenMeteoCityRemoteDataSourceTest {
 
     private val server = MockWebServer()
     private lateinit var dataSource: OpenMeteoCityRemoteDataSource
+    private val defaultLocale: Locale = Locale.getDefault()
 
     @Before
     fun setUp() {
+        // Sonuç dili cihaz dilinden gelir; test Türkçe cihaz varsayar.
+        Locale.setDefault(Locale.forLanguageTag("tr"))
         server.start()
         val api = Retrofit.Builder()
             .baseUrl(server.url("/v1/"))
@@ -30,6 +34,7 @@ class OpenMeteoCityRemoteDataSourceTest {
 
     @After
     fun tearDown() {
+        Locale.setDefault(defaultLocale)
         server.shutdown()
     }
 

@@ -9,8 +9,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -76,10 +77,12 @@ fun FavoritesScreen(
 
                         is UiState.Error -> ErrorView(message = state.message.asString(), onRetry = onRetry)
 
-                        is UiState.Success -> LazyColumn(
+                        is UiState.Success -> LazyVerticalGrid(
+                            columns = GridCells.Adaptive(minSize = CARD_MIN_WIDTH),
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(items = state.data, key = { it.cityId }) { item ->
                                 CityWeatherCard(
@@ -96,3 +99,5 @@ fun FavoritesScreen(
         }
     }
 }
+
+private val CARD_MIN_WIDTH = 320.dp

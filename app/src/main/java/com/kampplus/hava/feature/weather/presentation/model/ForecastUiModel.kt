@@ -16,8 +16,9 @@ data class ForecastUiModel(
     val conditionEmoji: String,
     val conditionLabel: UiText,
     val feelsLikeText: String?,
-    val humidityText: String?,
-    val windText: String?,
+    /** Birimli metinler [UiText]: yüzde ve hız yazımı dile göre değişir ("%45" / "45%"). */
+    val humidityText: UiText?,
+    val windText: UiText?,
     val hourly: List<HourlyUiModel>,
     val daily: List<DailyUiModel>,
     val isFavorite: Boolean = false,
@@ -37,7 +38,7 @@ data class HourlyUiModel(
     val timeText: String,
     val emoji: String,
     val temperatureText: String,
-    val precipitationText: String?,
+    val precipitationText: UiText?,
     val icon: ImageVector = Icons.Filled.Thermostat,
     val iconTint: Color = WeatherPalette.Fog,
     val isNow: Boolean = false
@@ -48,7 +49,7 @@ data class DailyUiModel(
     val emoji: String,
     val minText: String,
     val maxText: String,
-    val precipitationText: String?,
+    val precipitationText: UiText?,
     val icon: ImageVector = Icons.Filled.Thermostat,
     val iconTint: Color = WeatherPalette.Fog,
     /** Sıcaklık aralığı çubuğu için ham değerler (°C). */

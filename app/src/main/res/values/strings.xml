@@ -80,4 +80,6 @@
     <string name="action_open_location_settings">Konum ayarları</string>
     <string name="offline_banner">Çevrimdışısın · Kayıtlı son veriler gösteriliyor</string>
     <string name="updated_at">Son güncelleme %1$s</string>
+    <string name="percent_value">%%%1$d</string>
+    <string name="wind_speed_value">%1$d km/sa</string>
 </resources>

@@ -1,7 +1,6 @@
 package com.kampplus.hava.feature.weather.presentation.list
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -12,8 +11,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -66,10 +67,6 @@ fun CityListScreen(
                 onQueryChange = onQueryChange,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
-            // Arama sırasında konum kartı çekilir; sonuçlar için yer açılır.
-            AnimatedVisibility(visible = !uiState.isSearching) {
-                Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp)) { locationCard() }
-            }
             PullToRefreshBox(
                 isRefreshing = uiState.isRefreshing,
                 onRefresh = onRefresh,
@@ -79,20 +76,27 @@ fun CityListScreen(
                     uiState = uiState,
                     onCityClick = onCityClick,
                     onFavoriteClick = onFavoriteClick,
-                    onRetry = onRetry
+                    onRetry = onRetry,
+                    // Arama sırasında konum kartı çekilir; sonuçlar için yer açılır.
+                    header = if (uiState.isSearching) null else locationCard
                 )
             }
         }
     }
 }
 
+/**
+ * Liste durumları. [header] (konum kartı) listeyle birlikte kayar; yükleme/hata durumlarında
+ * içeriğin üstünde durur. Böylece yatay ekranda da liste için yer kalır.
+ */
 @Composable
 private fun ListContent(
     uiState: CityListUiState,
     onCityClick: (Long) -> Unit,
     onFavoriteClick: (Long) -> Unit,
     onRetry: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    header: (@Composable () -> Unit)? = null
 ) {
     // Durumlar arası geçiş yumuşak: shimmer → liste, liste → boş sonuç vb. birbirinin içine erir.
     AnimatedContent(
@@ -102,27 +106,42 @@ private fun ListContent(
         label = "listState",
         modifier = modifier.fillMaxSize()
     ) { content ->
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            when (content) {
-                UiState.Loading -> ShimmerList()
-                UiState.Empty -> EmptyView(
-                    icon = Icons.Filled.Search,
-                    title = stringResource(R.string.list_empty_title),
-                    message = if (uiState.isSearching) {
-                        stringResource(R.string.search_empty_message, uiState.query.trim())
-                    } else {
-                        stringResource(R.string.list_empty_message)
+        if (content is UiState.Success) {
+            CityList(
+                items = content.data,
+                updatedAtText = uiState.updatedAtText,
+                onCityClick = onCityClick,
+                onFavoriteClick = onFavoriteClick,
+                header = header
+            )
+        } else {
+            Column(modifier = Modifier.fillMaxSize()) {
+                if (header != null) {
+                    Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) { header() }
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    when (content) {
+                        UiState.Loading -> ShimmerList()
+                        UiState.Empty -> EmptyView(
+                            icon = Icons.Filled.Search,
+                            title = stringResource(R.string.list_empty_title),
+                            message = if (uiState.isSearching) {
+                                stringResource(R.string.search_empty_message, uiState.query.trim())
+                            } else {
+                                stringResource(R.string.list_empty_message)
+                            }
+                        )
+
+                        is UiState.Error -> ErrorView(message = content.message.asString(), onRetry = onRetry)
+
+                        is UiState.Success -> Unit
                     }
-                )
-
-                is UiState.Error -> ErrorView(message = content.message.asString(), onRetry = onRetry)
-
-                is UiState.Success -> CityList(
-                    items = content.data,
-                    updatedAtText = uiState.updatedAtText,
-                    onCityClick = onCityClick,
-                    onFavoriteClick = onFavoriteClick
-                )
+                }
             }
         }
     }
@@ -134,13 +153,22 @@ private fun CityList(
     updatedAtText: String?,
     onCityClick: (Long) -> Unit,
     onFavoriteClick: (Long) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    header: (@Composable () -> Unit)? = null
 ) {
-    LazyColumn(
+    // Geniş ekranda (tablet, yatay) kartlar iki sütuna dizilir; telefonda tek sütun.
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = CARD_MIN_WIDTH),
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        if (header != null) {
+            item(key = "header", span = { GridItemSpan(maxLineSpan) }) {
+                Box(modifier = Modifier.animateItem()) { header() }
+            }
+        }
         items(items = items, key = { it.cityId }) { item ->
             CityWeatherCard(
                 item = item,
@@ -150,7 +178,7 @@ private fun CityList(
             )
         }
         if (updatedAtText != null) {
-            item(key = "updatedAt") {
+            item(key = "updatedAt", span = { GridItemSpan(maxLineSpan) }) {
                 Text(
                     text = stringResource(R.string.updated_at, updatedAtText),
                     style = MaterialTheme.typography.labelSmall,
@@ -164,6 +192,8 @@ private fun CityList(
         }
     }
 }
+
+private val CARD_MIN_WIDTH = 320.dp
 
 @Preview(showBackground = true)
 @Composable

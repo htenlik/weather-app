@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kampplus.hava.R
@@ -50,7 +51,12 @@ private fun HourCard(hour: HourlyUiModel, modifier: Modifier = Modifier) {
     }
     val iconTint = if (hour.isNow) MaterialTheme.colorScheme.onPrimary else hour.iconTint
     val precipitationColor = if (hour.isNow) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
-    Card(modifier = modifier.width(80.dp), colors = colors) {
+    Card(
+        modifier = modifier
+            .width(80.dp)
+            .semantics(mergeDescendants = true) {},
+        colors = colors
+    ) {
         Column(
             modifier = Modifier
                 .padding(vertical = 12.dp)
@@ -75,7 +81,7 @@ private fun HourCard(hour: HourlyUiModel, modifier: Modifier = Modifier) {
                     )
                 }
                 Text(
-                    text = hour.precipitationText ?: " ",
+                    text = hour.precipitationText?.asString() ?: " ",
                     style = MaterialTheme.typography.labelSmall,
                     color = precipitationColor
                 )
