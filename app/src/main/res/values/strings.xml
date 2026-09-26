@@ -67,4 +67,15 @@
     <string name="settings_source_code_description">GitHub’da görüntüle</string>
     <string name="settings_made_with">Kotlin ve Jetpack Compose ile geliştirildi · KAMP+ Bilişim Kampı</string>
     <string name="error_no_browser">Bağlantıyı açacak bir uygulama bulunamadı.</string>
+    <string name="error_location_disabled">Konum servisleri kapalı.</string>
+    <string name="error_location_unavailable">Konum alınamadı. Biraz sonra tekrar dene.</string>
+    <string name="location_label">Konumum</string>
+    <string name="location_permission_title">Bulunduğun yerin havası</string>
+    <string name="location_permission_message">Konum izni verirsen bulunduğun yerin hava durumunu burada görürsün.</string>
+    <string name="action_use_location">Konumu kullan</string>
+    <string name="location_denied_title">Konum izni kapalı</string>
+    <string name="location_denied_message">İzni uygulama ayarlarından verebilirsin.</string>
+    <string name="action_open_app_settings">Ayarları aç</string>
+    <string name="location_locating">Konum alınıyor…</string>
+    <string name="action_open_location_settings">Konum ayarları</string>
 </resources>
