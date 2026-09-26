@@ -11,11 +11,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.kampplus.hava.core.ui.component.ConditionIcon
 import com.kampplus.hava.core.ui.component.FavoriteToggleButton
-import com.kampplus.hava.core.ui.component.TemperatureBadge
 import com.kampplus.hava.core.ui.text.UiText
 import com.kampplus.hava.core.ui.theme.HavaTheme
 import com.kampplus.hava.feature.weather.presentation.model.CityWeatherUiModel
@@ -25,11 +26,11 @@ import com.kampplus.hava.feature.weather.presentation.model.temperatureColor
 fun CityWeatherCard(item: CityWeatherUiModel, onClick: () -> Unit, onFavoriteClick: () -> Unit, modifier: Modifier = Modifier) {
     Card(onClick = onClick, modifier = modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(start = 12.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            TemperatureBadge(text = item.temperatureText, containerColor = temperatureColor(item.temperatureC))
+            ConditionIcon(icon = item.icon, tint = item.iconTint, contentDescription = item.conditionLabel.asString())
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = item.title,
@@ -39,16 +40,24 @@ fun CityWeatherCard(item: CityWeatherUiModel, onClick: () -> Unit, onFavoriteCli
                 )
                 Text(
                     text = item.subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "${item.conditionEmoji} ${item.conditionLabel.asString()}",
-                    style = MaterialTheme.typography.bodyMedium
+                    text = item.conditionLabel.asString(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
+            Text(
+                text = item.temperatureText,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = temperatureColor(item.temperatureC)
+            )
             FavoriteToggleButton(isFavorite = item.isFavorite, onClick = onFavoriteClick)
         }
     }
@@ -66,7 +75,8 @@ private fun CityWeatherCardPreview() {
                 temperatureText = "21°",
                 temperatureC = 21.0,
                 conditionEmoji = "☀️",
-                conditionLabel = UiText.Dynamic("Açık")
+                conditionLabel = UiText.Dynamic("Açık"),
+                isFavorite = true
             ),
             onClick = {},
             onFavoriteClick = {}
