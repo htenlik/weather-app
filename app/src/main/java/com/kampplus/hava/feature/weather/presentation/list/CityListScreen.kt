@@ -1,6 +1,7 @@
 package com.kampplus.hava.feature.weather.presentation.list
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -45,7 +46,8 @@ fun CityListScreen(
     onFavoriteClick: (Long) -> Unit,
     onRetry: () -> Unit,
     onRefresh: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    locationCard: @Composable () -> Unit = {}
 ) {
     Scaffold(
         modifier = modifier,
@@ -61,6 +63,10 @@ fun CityListScreen(
                 onQueryChange = onQueryChange,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
+            // Arama sırasında konum kartı çekilir; sonuçlar için yer açılır.
+            AnimatedVisibility(visible = !uiState.isSearching) {
+                Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp)) { locationCard() }
+            }
             PullToRefreshBox(
                 isRefreshing = uiState.isRefreshing,
                 onRefresh = onRefresh,

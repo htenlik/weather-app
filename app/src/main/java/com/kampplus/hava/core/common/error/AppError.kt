@@ -12,6 +12,12 @@ sealed interface AppError {
 
     data object Parse : AppError
 
+    /** Cihazda konum servisleri kapalı. */
+    data object LocationDisabled : AppError
+
+    /** Konum servisleri açık ama konum alınamadı (zaman aşımı, sağlayıcı yok, izin yok). */
+    data object LocationUnavailable : AppError
+
     data class Unknown(
         val cause: Throwable
     ) : AppError
