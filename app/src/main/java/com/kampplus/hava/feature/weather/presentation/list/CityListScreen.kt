@@ -1,5 +1,9 @@
 package com.kampplus.hava.feature.weather.presentation.list
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -81,20 +85,31 @@ private fun ListContent(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        when (val content = uiState.content) {
-            UiState.Loading -> ShimmerList()
-            UiState.Empty -> EmptyView(
-                icon = Icons.Filled.Search,
-                title = stringResource(R.string.list_empty_title),
-                message = if (uiState.isSearching) {
-                    stringResource(R.string.search_empty_message, uiState.query.trim())
-                } else {
-                    stringResource(R.string.list_empty_message)
-                }
-            )
-            is UiState.Error -> ErrorView(message = content.message.asString(), onRetry = onRetry)
-            is UiState.Success -> CityList(items = content.data, onCityClick = onCityClick, onFavoriteClick = onFavoriteClick)
+    // Durumlar arası geçiş yumuşak: shimmer → liste, liste → boş sonuç vb. birbirinin içine erir.
+    AnimatedContent(
+        targetState = uiState.content,
+        contentKey = { it::class },
+        transitionSpec = { fadeIn() togetherWith fadeOut() },
+        label = "listState",
+        modifier = modifier.fillMaxSize()
+    ) { content ->
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            when (content) {
+                UiState.Loading -> ShimmerList()
+                UiState.Empty -> EmptyView(
+                    icon = Icons.Filled.Search,
+                    title = stringResource(R.string.list_empty_title),
+                    message = if (uiState.isSearching) {
+                        stringResource(R.string.search_empty_message, uiState.query.trim())
+                    } else {
+                        stringResource(R.string.list_empty_message)
+                    }
+                )
+
+                is UiState.Error -> ErrorView(message = content.message.asString(), onRetry = onRetry)
+
+                is UiState.Success -> CityList(items = content.data, onCityClick = onCityClick, onFavoriteClick = onFavoriteClick)
+            }
         }
     }
 }
@@ -115,7 +130,8 @@ private fun CityList(
             CityWeatherCard(
                 item = item,
                 onClick = { onCityClick(item.cityId) },
-                onFavoriteClick = { onFavoriteClick(item.cityId) }
+                onFavoriteClick = { onFavoriteClick(item.cityId) },
+                modifier = Modifier.animateItem()
             )
         }
     }

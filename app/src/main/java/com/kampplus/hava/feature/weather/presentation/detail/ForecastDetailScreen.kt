@@ -1,8 +1,12 @@
 package com.kampplus.hava.feature.weather.presentation.detail
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,28 +23,32 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kampplus.hava.R
 import com.kampplus.hava.core.ui.component.ErrorView
 import com.kampplus.hava.core.ui.component.FavoriteToggleButton
+import com.kampplus.hava.core.ui.component.LightStatusBarIcons
 import com.kampplus.hava.core.ui.component.LoadingView
-import com.kampplus.hava.core.ui.component.TemperatureBadge
 import com.kampplus.hava.core.ui.state.UiState
 import com.kampplus.hava.core.ui.text.UiText
 import com.kampplus.hava.core.ui.theme.HavaTheme
+import com.kampplus.hava.core.ui.theme.WeatherPalette
+import com.kampplus.hava.core.ui.theme.heroColors
 import com.kampplus.hava.feature.weather.presentation.detail.component.DailyForecastItem
+import com.kampplus.hava.feature.weather.presentation.detail.component.HeroHeader
 import com.kampplus.hava.feature.weather.presentation.detail.component.HourlyForecastRow
 import com.kampplus.hava.feature.weather.presentation.detail.component.ShareButton
 import com.kampplus.hava.feature.weather.presentation.model.DailyUiModel
 import com.kampplus.hava.feature.weather.presentation.model.ForecastUiModel
 import com.kampplus.hava.feature.weather.presentation.model.HourlyUiModel
-import com.kampplus.hava.feature.weather.presentation.model.temperatureColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,21 +62,35 @@ fun ForecastDetailScreen(
     modifier: Modifier = Modifier,
     isRefreshing: Boolean = false
 ) {
+    val forecast = (uiState as? UiState.Success)?.data
+    // Üst çubuk, başlık gradient'inin ilk rengini alır; içerik yokken varsayılan renklerde kalır.
+    val heroStart = forecast?.let { heroColors(tint = it.iconTint, isDay = it.isDay).first() }
+    LightStatusBarIcons(enabled = heroStart != null)
     Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text((uiState as? UiState.Success)?.data?.cityName ?: stringResource(R.string.detail_title)) },
+                title = { Text(forecast?.cityName ?: stringResource(R.string.detail_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 actions = {
-                    if (uiState is UiState.Success) {
-                        FavoriteToggleButton(isFavorite = uiState.data.isFavorite, onClick = onFavoriteClick)
-                        ShareButton(onClick = { onShare(uiState.data) })
+                    if (forecast != null) {
+                        FavoriteToggleButton(isFavorite = forecast.isFavorite, onClick = onFavoriteClick, tintOnDark = true)
+                        ShareButton(onClick = { onShare(forecast) })
                     }
+                },
+                colors = if (heroStart != null) {
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = heroStart,
+                        titleContentColor = Color.White,
+                        navigationIconContentColor = Color.White,
+                        actionIconContentColor = Color.White
+                    )
+                } else {
+                    TopAppBarDefaults.topAppBarColors()
                 }
             )
         }
@@ -81,11 +103,20 @@ fun ForecastDetailScreen(
                 .padding(innerPadding),
             contentAlignment = Alignment.Center
         ) {
-            when (uiState) {
-                UiState.Loading -> LoadingView()
-                UiState.Empty -> ErrorView(message = stringResource(R.string.error_not_found))
-                is UiState.Error -> ErrorView(message = uiState.message.asString(), onRetry = onRetry)
-                is UiState.Success -> ForecastContent(forecast = uiState.data)
+            AnimatedContent(
+                targetState = uiState,
+                contentKey = { it::class },
+                transitionSpec = { fadeIn() togetherWith fadeOut() },
+                label = "forecastState"
+            ) { state ->
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    when (state) {
+                        UiState.Loading -> LoadingView()
+                        UiState.Empty -> ErrorView(message = stringResource(R.string.error_not_found))
+                        is UiState.Error -> ErrorView(message = state.message.asString(), onRetry = onRetry)
+                        is UiState.Success -> ForecastContent(forecast = state.data)
+                    }
+                }
             }
         }
     }
@@ -93,63 +124,35 @@ fun ForecastDetailScreen(
 
 @Composable
 private fun ForecastContent(forecast: ForecastUiModel, modifier: Modifier = Modifier) {
+    val rangeMin = forecast.daily.minOfOrNull { it.minC } ?: 0.0
+    val rangeMax = forecast.daily.maxOfOrNull { it.maxC } ?: 0.0
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(vertical = 16.dp),
+            .padding(bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        CurrentWeatherHeader(forecast = forecast, modifier = Modifier.padding(horizontal = 16.dp))
+        HeroHeader(forecast = forecast)
+        Text(
+            text = forecast.subtitle,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
         SectionTitle(text = stringResource(R.string.detail_hourly))
         HourlyForecastRow(items = forecast.hourly)
         SectionTitle(text = stringResource(R.string.detail_daily))
-        Card(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+        ) {
             forecast.daily.forEachIndexed { index, day ->
                 if (index > 0) HorizontalDivider()
-                DailyForecastItem(day = day)
+                DailyForecastItem(day = day, rangeMinC = rangeMin, rangeMaxC = rangeMax)
             }
         }
-    }
-}
-
-@Composable
-private fun CurrentWeatherHeader(forecast: ForecastUiModel, modifier: Modifier = Modifier) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            TemperatureBadge(text = forecast.temperatureText, containerColor = temperatureColor(forecast.temperatureC), size = 88.dp)
-            Column {
-                Text(
-                    text = forecast.subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "${forecast.conditionEmoji} ${forecast.conditionLabel.asString()}",
-                    style = MaterialTheme.typography.titleLarge
-                )
-            }
-        }
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                forecast.feelsLikeText?.let { Metric(label = stringResource(R.string.detail_feels_like), value = it) }
-                forecast.humidityText?.let { Metric(label = stringResource(R.string.detail_humidity), value = it) }
-                forecast.windText?.let { Metric(label = stringResource(R.string.detail_wind), value = it) }
-            }
-        }
-    }
-}
-
-@Composable
-private fun Metric(label: String, value: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = value, style = MaterialTheme.typography.titleMedium)
-        Text(text = label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -175,8 +178,13 @@ private fun ForecastDetailScreenPreview() {
                     feelsLikeText = "20°",
                     humidityText = "%45",
                     windText = "12 km/sa",
-                    hourly = List(8) { HourlyUiModel("1$it:00", "☀️", "2$it°", null) },
-                    daily = List(7) { DailyUiModel(UiText.Dynamic("Cuma"), "⛅", "14°", "24°", "%10") }
+                    hourly = List(8) { HourlyUiModel("1$it:00", "☀️", "2$it°", if (it % 3 == 0) "%20" else null, isNow = it == 0) },
+                    daily = List(7) {
+                        DailyUiModel(UiText.Dynamic("Cuma"), "⛅", "1$it°", "2${it + 2}°", "%10", minC = 10.0 + it, maxC = 22.0 + it)
+                    },
+                    iconTint = WeatherPalette.Sun,
+                    todayMinText = "14°",
+                    todayMaxText = "24°"
                 )
             ),
             onBack = {},

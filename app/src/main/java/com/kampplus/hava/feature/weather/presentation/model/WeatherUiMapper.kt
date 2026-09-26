@@ -19,7 +19,7 @@ class WeatherUiMapper @Inject constructor(
     private val conditionUiRegistry: WeatherConditionUiRegistry
 ) {
     fun toListItem(cityWeather: CityWeather, isFavorite: Boolean = false): CityWeatherUiModel = with(cityWeather) {
-        val conditionUi = conditionUi(current.weatherCode)
+        val conditionUi = conditionUi(current.weatherCode, current.isDay)
         CityWeatherUiModel(
             cityId = city.id,
             title = city.name,
@@ -28,13 +28,16 @@ class WeatherUiMapper @Inject constructor(
             temperatureC = current.temperatureC,
             conditionEmoji = conditionUi.emoji,
             conditionLabel = conditionUi.label,
-            isFavorite = isFavorite
+            isFavorite = isFavorite,
+            icon = conditionUi.icon,
+            iconTint = conditionUi.tint
         )
     }
 
     fun toForecast(city: City, forecast: Forecast, isFavorite: Boolean = false): ForecastUiModel = with(forecast) {
-        val conditionUi = conditionUi(current.weatherCode)
+        val conditionUi = conditionUi(current.weatherCode, current.isDay)
         val currentHour = current.observedAt.truncatedTo(ChronoUnit.HOURS)
+        val today = daily.firstOrNull()
         ForecastUiModel(
             cityId = city.id,
             cityName = city.name,
@@ -46,32 +49,48 @@ class WeatherUiMapper @Inject constructor(
             feelsLikeText = current.apparentTemperatureC?.let(::degrees),
             humidityText = current.humidityPercent?.let { "%$it" },
             windText = current.windSpeedKmh?.let { "${it.roundToInt()} km/sa" },
-            hourly = hourly.filter { !it.time.isBefore(currentHour) }.take(HOURLY_COUNT).map { hour ->
+            hourly = hourly.filter { !it.time.isBefore(currentHour) }.take(HOURLY_COUNT).mapIndexed { index, hour ->
+                // Gece/gündüz saat bazında bilinmediği için anlık değere göre karar verilir.
+                val hourUi = conditionUi(hour.weatherCode, current.isDay)
                 HourlyUiModel(
                     timeText = hour.time.format(HOUR_FORMAT),
-                    emoji = conditionUi(hour.weatherCode).emoji,
+                    emoji = hourUi.emoji,
                     temperatureText = degrees(hour.temperatureC),
-                    precipitationText = percent(hour.precipitationProbability)
+                    precipitationText = percent(hour.precipitationProbability),
+                    icon = hourUi.icon,
+                    iconTint = hourUi.tint,
+                    isNow = index == 0
                 )
             },
             daily = daily.mapIndexed { index, day ->
+                val dayUi = conditionUi(day.weatherCode, isDay = true)
                 DailyUiModel(
                     dayLabel = if (index == 0) {
                         UiText.Resource(R.string.today)
                     } else {
                         UiText.Dynamic(day.date.format(DAY_FORMAT).replaceFirstChar(Char::titlecase))
                     },
-                    emoji = conditionUi(day.weatherCode).emoji,
+                    emoji = dayUi.emoji,
                     minText = degrees(day.minTemperatureC),
                     maxText = degrees(day.maxTemperatureC),
-                    precipitationText = percent(day.precipitationProbability)
+                    precipitationText = percent(day.precipitationProbability),
+                    icon = dayUi.icon,
+                    iconTint = dayUi.tint,
+                    minC = day.minTemperatureC,
+                    maxC = day.maxTemperatureC
                 )
             },
-            isFavorite = isFavorite
+            isFavorite = isFavorite,
+            icon = conditionUi.icon,
+            iconTint = conditionUi.tint,
+            isDay = current.isDay,
+            todayMinText = today?.let { degrees(it.minTemperatureC) },
+            todayMaxText = today?.let { degrees(it.maxTemperatureC) }
         )
     }
 
-    private fun conditionUi(code: WeatherCode): WeatherConditionUi = conditionUiRegistry.resolve(conditionClassifier.classify(code))
+    private fun conditionUi(code: WeatherCode, isDay: Boolean): WeatherConditionUi =
+        conditionUiRegistry.resolve(conditionClassifier.classify(code)).at(isDay)
 
     private fun subtitle(city: City) = listOfNotNull(city.region, city.country).distinct().joinToString(", ")
 
