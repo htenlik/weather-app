@@ -19,7 +19,9 @@ data class HourlyForecast(
     val time: LocalDateTime,
     val temperatureC: Double,
     val weatherCode: WeatherCode,
-    val precipitationProbability: Int? = null
+    val precipitationProbability: Int? = null,
+    /** O saatte güneş ufkun üstünde mi; gece saatlerinde ay ikonu için. */
+    val isDay: Boolean = true
 )
 
 data class DailyForecast(

@@ -64,7 +64,7 @@ class OpenMeteoWeatherRemoteDataSource @Inject constructor(
     private companion object {
         // Yeni bir değişken (ör. uv_index) = buraya alan adı + DTO/domain alanı.
         const val CURRENT_FIELDS = "temperature_2m,weather_code,apparent_temperature,relative_humidity_2m,wind_speed_10m,is_day"
-        const val HOURLY_FIELDS = "temperature_2m,weather_code,precipitation_probability"
+        const val HOURLY_FIELDS = "temperature_2m,weather_code,precipitation_probability,is_day"
         const val DAILY_FIELDS = "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max"
         const val FORECAST_DAYS = 7
     }

@@ -38,7 +38,8 @@ class FakeWeatherRemoteDataSource @Inject constructor(
                 // Gün içi eğri, gözlem saatinde anlık sıcaklığa eşit olacak şekilde kaydırılır.
                 temperatureC = current.temperatureC + DAILY_CURVE[time.hour] - DAILY_CURVE[OBSERVED_AT.hour],
                 weatherCode = if (hour == 0) current.weatherCode else WeatherCode(CODES[(slot + hour) % CODES.size]),
-                precipitationProbability = (hour * 7) % 60
+                precipitationProbability = (hour * 7) % 60,
+                isDay = time.hour in DAYLIGHT_HOURS
             )
         }
         val daily = List(DAYS) { day ->
@@ -77,6 +78,7 @@ class FakeWeatherRemoteDataSource @Inject constructor(
             3.0, 3.5, 3.5, 3.0, 2.0, 1.0, 0.0, -1.0, -2.0, -3.0, -4.0, -4.5
         )
         const val FAKE_LATENCY_MS = 300L
+        val DAYLIGHT_HOURS = 6..19
         val OBSERVED_AT: LocalDateTime = LocalDateTime.of(2026, 9, 24, 12, 0)
         val TEMPERATURES =
             listOf(18.4, 21.0, 26.3, 19.7, 29.1, 30.2, 22.8, 27.5, 31.4, 20.1, 28.0, 25.6, 17.9, 16.4, 19.2, 18.8, 11.3, 13.7, 23.5, 27.0)
